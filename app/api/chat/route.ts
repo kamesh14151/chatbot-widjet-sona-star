@@ -7,7 +7,7 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
-import { sonaStarKnowledgeBasePrompt } from "@/lib/datasets/sona-star-faq";
+import { buildSonaStarSystemPrompt } from "@/lib/datasets/sona-star-faq";
 
 export async function POST(req: Request) {
   const apiKey =
@@ -33,6 +33,8 @@ export async function POST(req: Request) {
   } = await req.json();
 
   const configuredDelay = Number(process.env.CHAT_STREAM_DELAY_MS ?? "28");
+  const sonaStarWebsiteUrl = process.env.SONA_STAR_WEBSITE_URL?.trim();
+  const baseSystemPrompt = buildSonaStarSystemPrompt(sonaStarWebsiteUrl);
   const streamDelayMs =
     Number.isFinite(configuredDelay) && configuredDelay >= 0
       ? configuredDelay
@@ -42,8 +44,8 @@ export async function POST(req: Request) {
     model: google("gemini-2.5-flash-lite"),
     messages: await convertToModelMessages(messages),
     system: system
-      ? `${sonaStarKnowledgeBasePrompt}\n\nAdditional instructions:\n${system}`
-      : sonaStarKnowledgeBasePrompt,
+      ? `${baseSystemPrompt}\n\nAdditional instructions:\n${system}`
+      : baseSystemPrompt,
     tools: {
       ...frontendTools(tools ?? {}),
     },

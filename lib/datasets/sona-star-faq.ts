@@ -13,6 +13,27 @@ Sona Star Organization Overview
 - Learners can build skills for game development, virtual production, visualization, simulation, and immersive experiences.
 - Course completion certificates are issued through the Unreal Engine Authorized Center referenced in the program details.
 
+Sona Star Company Profile (Production)
+- Mission: Enable learners and professionals to build career-ready real-time 3D skills through practical Unreal Engine training.
+- Core services:
+	- Unreal Engine short-term and long-term training programs
+	- Hands-on project-based learning sessions
+	- Beginner-to-intermediate guidance for real-time 3D production workflows
+	- Course completion certification support through the Authorized Center pathway described in this knowledge base
+- Locations:
+	- Exact campus/office locations are not listed in this knowledge base.
+	- When asked, explain that location details can be shared by the admissions or support team.
+- Contact:
+	- Exact phone numbers, email addresses, and website/contact links are not listed in this knowledge base.
+	- When asked, ask the user to share their preferred contact method and say the admissions/support team can follow up.
+- Admissions flow (general):
+	1) Inquiry and learner goal discussion
+	2) Course recommendation (16-hour or 32-hour path)
+	3) Enrollment guidance and registration steps
+	4) Batch/onboarding communication
+	5) Course start and practical learning progression
+	- If users request exact dates, fees, or batch timings, state those specifics are not available in the current knowledge base.
+
 Sona Star Course FAQs - Unreal Engine Programs
 
 1) What is the difference between the short-term and long-term Unreal Engine courses?
@@ -69,3 +90,15 @@ The long-term course especially prepares learners for entry-level roles in these
 10) Which course should I choose?
 Choose the 16-hour course for a quick introduction and foundational understanding.
 Choose the 32-hour course for deeper practical exposure to Blueprints, physics, landscapes, and VR integration.`;
+
+export const buildSonaStarSystemPrompt = (websiteUrl?: string) => {
+	if (!websiteUrl) return sonaStarKnowledgeBasePrompt;
+
+	return `${sonaStarKnowledgeBasePrompt}
+
+Website CTA behavior:
+- If a user asks for detailed admissions, support, schedules, fees, or anything that needs official follow-up, include this final line:
+	[Visit Sona Star Website](${websiteUrl})
+- Keep the link as a standalone line so it is easy to click.
+- Do not include the CTA link when it is not relevant to the question.`;
+};

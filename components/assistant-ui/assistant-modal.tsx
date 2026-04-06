@@ -39,9 +39,19 @@ export const AssistantModal = () => {
       <AssistantModalPrimitive.Content
         dissmissOnInteractOutside
         sideOffset={16}
-        className="h-[500px] w-[400px] max-w-[calc(100vw-2rem)] rounded-xl border bg-popover shadow-md duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-bottom-4"
+        className="h-[500px] w-[400px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border bg-popover shadow-md duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-bottom-4"
       >
-        <Thread />
+        <div className="flex h-full flex-col">
+          <div className="border-b bg-muted/35 px-4 py-3">
+            <p className="text-sm font-semibold leading-none">Sona Star Assistant</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Course guidance, admissions help, and support links
+            </p>
+          </div>
+          <div className="min-h-0 flex-1">
+            <Thread />
+          </div>
+        </div>
       </AssistantModalPrimitive.Content>
     </AssistantModalPrimitive.Root>
   );

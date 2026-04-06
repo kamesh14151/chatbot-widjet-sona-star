@@ -7,6 +7,7 @@ import {
   streamText,
   type UIMessage,
 } from "ai";
+import { sonaStarUnrealEngineFaqDataset } from "@/lib/datasets/sona-star-faq";
 
 export async function POST(req: Request) {
   const apiKey =
@@ -40,7 +41,9 @@ export async function POST(req: Request) {
   const result = streamText({
     model: google("gemini-2.5-flash-lite"),
     messages: await convertToModelMessages(messages),
-    system,
+    system: system
+      ? `${sonaStarUnrealEngineFaqDataset}\n\nAdditional instructions:\n${system}`
+      : sonaStarUnrealEngineFaqDataset,
     tools: {
       ...frontendTools(tools ?? {}),
     },

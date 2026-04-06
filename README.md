@@ -32,12 +32,12 @@ Higher value = slower typing effect. Lower value = faster rendering.
 Optional Sona Star website CTA link (used when users need official follow-up details):
 
 ```
-SONA_STAR_WEBSITE_URL=https://your-sona-star-website.com
+SONA_STAR_WEBSITE_URL=https://sonastar.com/
 ```
 
 When configured, the assistant can include a clickable markdown link in relevant replies:
 
-`[Visit Sona Star Website](https://your-sona-star-website.com)`
+`[Visit Sona Star Website](https://sonastar.com/)`
 
 ## Getting Started
 

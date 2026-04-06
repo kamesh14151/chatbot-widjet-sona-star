@@ -33,7 +33,8 @@ export async function POST(req: Request) {
   } = await req.json();
 
   const configuredDelay = Number(process.env.CHAT_STREAM_DELAY_MS ?? "28");
-  const sonaStarWebsiteUrl = process.env.SONA_STAR_WEBSITE_URL?.trim();
+  const sonaStarWebsiteUrl =
+    process.env.SONA_STAR_WEBSITE_URL?.trim() || "https://sonastar.com/";
   const baseSystemPrompt = buildSonaStarSystemPrompt(sonaStarWebsiteUrl);
   const streamDelayMs =
     Number.isFinite(configuredDelay) && configuredDelay >= 0

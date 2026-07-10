@@ -64,10 +64,9 @@ const LanguageSelector: FC = () => {
 
 	const languages = [
 		{ label: "🇬🇧 English", value: "English" },
-		{ label: "🇮🇳 Hindi", value: "Hindi" },
-		{ label: "🇮🇳 Tamil", value: "Tamil" },
-		{ label: "🇮🇳 Telugu", value: "Telugu" },
 		{ label: "🇮🇳 Kannada", value: "Kannada" },
+		{ label: "🇮🇳 Tamil", value: "Tamil" },
+		{ label: "🇮🇳 Hindi", value: "Hindi" },
 	];
 
 	return (

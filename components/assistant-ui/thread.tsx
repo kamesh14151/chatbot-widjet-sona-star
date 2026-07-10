@@ -124,7 +124,7 @@ const LeadCaptureForm: FC<{ onSubmit: () => void }> = ({ onSubmit }) => {
 			if (!res.ok) {
 				throw new Error(data.error || "Submission failed.");
 			}
-			localStorage.setItem("scale_uwa_lead_submitted", "true");
+			sessionStorage.setItem("scale_uwa_lead_submitted", "true");
 			onSubmit();
 		} catch (err: any) {
 			setError(err.message || "Failed to submit details.");
@@ -204,9 +204,16 @@ export const Thread: FC = () => {
 	const [hasSubmittedDetails, setHasSubmittedDetails] = useState(false);
 
 	useEffect(() => {
-		const isSubmitted = localStorage.getItem("scale_uwa_lead_submitted") === "true";
+		const isSubmitted = sessionStorage.getItem("scale_uwa_lead_submitted") === "true";
 		setHasSubmittedDetails(isSubmitted);
 	}, []);
+
+	useEffect(() => {
+		if (messages.length === 0) {
+			setHasSubmittedDetails(false);
+			sessionStorage.removeItem("scale_uwa_lead_submitted");
+		}
+	}, [messages.length]);
 
 	const userMessages = messages.filter((m) => m.role === "user");
 	const shouldShowForm = userMessages.length >= 3 && !hasSubmittedDetails;

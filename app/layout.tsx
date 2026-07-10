@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "SONA UWA Chatbot",
-	description: "SONA UWA Chatbot Widget",
+	title: "SCALE UWA Chatbot",
+	description: "SCALE UWA Chatbot Widget",
 };
 
 export default function RootLayout({

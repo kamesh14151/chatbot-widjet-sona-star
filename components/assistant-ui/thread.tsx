@@ -98,10 +98,10 @@ const ThreadWelcome: FC = () => {
 			<div className="aui-thread-welcome-center flex w-full grow flex-col items-center justify-center">
 				<div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
 					<h1 className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both font-bold text-3xl text-[#a82229] duration-200">
-						SONA UWA
+						SCALE UWA
 					</h1>
 					<p className="aui-thread-welcome-message-inner fade-in slide-in-from-bottom-1 animate-in fill-mode-both text-muted-foreground text-xl delay-75 duration-200">
-						Ask about Unreal Engine courses, admissions, and career pathways.
+						Ask about MS in Data Science 1+1 pathway, admissions, and careers.
 					</p>
 				</div>
 			</div>

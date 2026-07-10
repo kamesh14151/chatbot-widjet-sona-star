@@ -47,7 +47,7 @@ export const AssistantModal = () => {
 							<BotIcon className="size-5" />
 						</div>
 						<div>
-							<p className="text-sm font-semibold leading-none text-white tracking-wide">SONA UWA</p>
+							<p className="text-sm font-semibold leading-none text-white tracking-wide">SCALE UWA</p>
 							<p className="mt-1 text-[10px] text-zinc-300">
 								Course guidance, admissions help, and support links
 							</p>

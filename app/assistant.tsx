@@ -14,6 +14,18 @@ export const Assistant = () => {
 		transport: new AssistantChatTransport({
 			api: "/api/chat",
 		}),
+		messages: [
+			{
+				id: "welcome-msg",
+				role: "assistant",
+				parts: [
+					{
+						type: "text",
+						text: "👋 Welcome to SONA SCALE UWA! 🎓\nI'm your personal admissions assistant for the MS in Data Science – SONA-UWA 1+1 International Pathway Program.\n\nMay I know your name?",
+					},
+				],
+			},
+		],
 	});
 
 	return (

@@ -1,5 +1,5 @@
 import { AssistantModalPrimitive } from "@assistant-ui/react";
-import { BotIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { forwardRef } from "react";
 import { Thread } from "@/components/assistant-ui/thread";
 
@@ -14,10 +14,17 @@ const ModalButton = forwardRef<
 		className="relative size-full rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center border-2 border-white/10"
 		{...props}
 	>
-		<BotIcon
+		<div
 			data-state={state}
-			className="absolute inset-0 m-auto size-6 transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
-		/>
+			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center p-1 transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
+		>
+			{/* eslint-disable-next-line @next/next/no-img-element */}
+			<img
+				src="/logo.png"
+				alt="SCALE UWA Logo"
+				className="size-full object-contain"
+			/>
+		</div>
 		<XIcon
 			data-state={state}
 			className="absolute inset-0 m-auto size-6 transition-all duration-200 data-[state=closed]:scale-0 data-[state=closed]:-rotate-90"
@@ -30,7 +37,7 @@ ModalButton.displayName = "ModalButton";
 export const AssistantModal = () => {
 	return (
 		<AssistantModalPrimitive.Root>
-			<AssistantModalPrimitive.Anchor className="fixed right-4 bottom-24 z-50 size-14">
+			<AssistantModalPrimitive.Anchor className="fixed right-4 bottom-8 z-50 size-14">
 				<AssistantModalPrimitive.Trigger asChild>
 					<ModalButton />
 				</AssistantModalPrimitive.Trigger>
@@ -43,8 +50,13 @@ export const AssistantModal = () => {
 			>
 				<div className="flex h-full flex-col">
 					<div className="bg-[#1a1a1a] border-t-4 border-[#a82229] px-4 py-3.5 shadow-sm flex items-center gap-3">
-						<div className="flex size-9 items-center justify-center rounded-full bg-[#008276] text-white">
-							<BotIcon className="size-5" />
+						<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden p-0.5">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src="/logo.png"
+								alt="SCALE UWA Logo"
+								className="size-full object-contain"
+							/>
 						</div>
 						<div>
 							<p className="text-sm font-semibold leading-none text-white tracking-wide">SCALE UWA</p>

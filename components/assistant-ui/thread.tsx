@@ -18,12 +18,14 @@ import {
 	ChevronRightIcon,
 	CopyIcon,
 	DownloadIcon,
+	MicIcon,
+	MicOffIcon,
 	MoreHorizontalIcon,
 	PencilIcon,
 	RefreshCwIcon,
 	SquareIcon,
 } from "lucide-react";
-import type { FC } from "react";
+import { type FC, useCallback, useEffect, useRef, useState } from "react";
 import {
 	ComposerAddAttachment,
 	ComposerAttachments,
@@ -156,10 +158,106 @@ const Composer: FC = () => {
 	);
 };
 
+// ── Voice Recognition Hook ──────────────────────────────────────────
+type VoiceState = "idle" | "listening" | "unsupported";
+
+function useVoiceInput(onTranscript: (text: string) => void) {
+	const [voiceState, setVoiceState] = useState<VoiceState>("idle");
+	// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognition is not universally typed
+	const recognitionRef = useRef<any>(null);
+
+	useEffect(() => {
+		// biome-ignore lint/suspicious/noExplicitAny: cross-browser speech API
+		const w = window as any;
+		const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
+		if (!SpeechRecognitionAPI) {
+			setVoiceState("unsupported");
+			return;
+		}
+		// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognition instance
+		const rec: any = new SpeechRecognitionAPI();
+		rec.lang = "en-US";
+		rec.interimResults = false;
+		rec.maxAlternatives = 1;
+		// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognitionEvent not typed
+		rec.onresult = (e: any) => {
+			const transcript: string = e.results[0][0].transcript;
+			onTranscript(transcript);
+			setVoiceState("idle");
+		};
+		rec.onerror = () => setVoiceState("idle");
+		rec.onend = () => setVoiceState("idle");
+		recognitionRef.current = rec;
+	}, [onTranscript]);
+
+	const toggle = useCallback(() => {
+		const rec = recognitionRef.current;
+		if (!rec) return;
+		if (voiceState === "listening") {
+			rec.stop();
+			setVoiceState("idle");
+		} else {
+			rec.start();
+			setVoiceState("listening");
+		}
+	}, [voiceState]);
+
+	return { voiceState, toggle };
+}
+
+// ── Voice Mic Button ─────────────────────────────────────────────────
+const VoiceMicButton: FC<{ onTranscript: (text: string) => void }> = ({ onTranscript }) => {
+	const { voiceState, toggle } = useVoiceInput(onTranscript);
+	if (voiceState === "unsupported") return null;
+
+	const isListening = voiceState === "listening";
+	return (
+		<button
+			type="button"
+			onClick={toggle}
+			aria-label={isListening ? "Stop listening" : "Start voice input"}
+			title={isListening ? "Stop listening" : "Speak your message"}
+			className={
+				`flex size-8 items-center justify-center rounded-full transition-all duration-200 ${
+					isListening
+						? "bg-[#a82229] text-white animate-pulse shadow-lg shadow-red-400/40"
+						: "bg-muted text-muted-foreground hover:bg-[#008276] hover:text-white"
+				}`
+			}
+		>
+			{isListening ? (
+				<MicOffIcon className="size-4" />
+			) : (
+				<MicIcon className="size-4" />
+			)}
+		</button>
+	);
+};
+
+// ── Composer Input ref shim for voice fill ───────────────────────────
 const ComposerAction: FC = () => {
+	// We inject the voice transcript directly into the ComposerPrimitive textarea
+	const handleTranscript = useCallback((text: string) => {
+		const textarea = document.querySelector<HTMLTextAreaElement>(
+			".aui-composer-input",
+		);
+		if (!textarea) return;
+		// Use native input setter so React state picks up the change
+		const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+			window.HTMLTextAreaElement.prototype,
+			"value",
+		)?.set;
+		nativeInputValueSetter?.call(textarea, text);
+		textarea.dispatchEvent(new Event("input", { bubbles: true }));
+		textarea.focus();
+	}, []);
+
 	return (
 		<div className="aui-composer-action-wrapper relative flex items-center justify-between">
-			<ComposerAddAttachment />
+			<div className="flex items-center gap-1">
+				<ComposerAddAttachment />
+				<VoiceMicButton onTranscript={handleTranscript} />
+			</div>
 			<AuiIf condition={(s) => !s.thread.isRunning}>
 				<ComposerPrimitive.Send asChild>
 					<TooltipIconButton

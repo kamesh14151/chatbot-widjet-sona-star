@@ -14,6 +14,17 @@ const ModalButton = forwardRef<
 		className="relative size-full rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center border-2 border-white/10"
 		{...props}
 	>
+		{state !== "open" && (
+			<div className="absolute right-[68px] top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 px-4 py-2 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 animate-pulse select-none pointer-events-none">
+				<span className="relative flex h-2 w-2">
+					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+					<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+				</span>
+				Chat with me
+				{/* Triangle pointer */}
+				<div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-white dark:bg-zinc-950 border-r border-t border-zinc-200 dark:border-zinc-800 rotate-45" />
+			</div>
+		)}
 		<div
 			data-state={state}
 			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center p-1 transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
@@ -59,7 +70,12 @@ export const AssistantModal = () => {
 							/>
 						</div>
 						<div>
-							<p className="text-sm font-semibold leading-none text-white tracking-wide">SCALE UWA</p>
+							<p className="text-sm font-semibold leading-none text-white tracking-wide flex items-center gap-1.5">
+								SCALE UWA
+								<svg className="size-3.5 fill-[#1D9BF0] text-white flex-shrink-0" viewBox="0 0 24 24" aria-label="Verified account">
+									<path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.99-3.818-3.99-.48 0-.94.1-1.348.27C14.825 2.515 13.512 1.5 12 1.5s-2.825 1.015-3.422 2.28c-.406-.17-.866-.27-1.348-.27-2.108 0-3.818 1.78-3.818 3.99 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.71 3.99 3.818 3.99.48 0 .94-.1 1.348-.27.597 1.265 1.91 2.27 3.422 2.27s2.825-1.005 3.422-2.27c.406.17.866.27 1.348.27 2.108 0 3.818-1.78 3.818-3.99 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6zm-12.5 4L6 12.5l1.5-1.5 2.5 2.5 6.5-6.5 1.5 1.5-8 8z" />
+								</svg>
+							</p>
 							<p className="mt-1 text-[10px] text-zinc-300">
 								Course guidance, admissions help, and support links
 							</p>

@@ -15,14 +15,14 @@ const ModalButton = forwardRef<
 		{...props}
 	>
 		{state !== "open" && (
-			<div className="absolute right-[68px] top-1/2 -translate-y-1/2 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 px-4 py-2 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 animate-pulse select-none pointer-events-none">
+			<div className="absolute bottom-[68px] left-1/2 -translate-x-1/2 bg-white dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 px-4 py-2 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center gap-1.5 animate-pulse select-none pointer-events-none">
 				<span className="relative flex h-2 w-2">
 					<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
 					<span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
 				</span>
 				Chat with me
-				{/* Triangle pointer */}
-				<div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-white dark:bg-zinc-950 border-r border-t border-zinc-200 dark:border-zinc-800 rotate-45" />
+				{/* Triangle pointer pointing down */}
+				<div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-white dark:bg-zinc-950 border-r border-b border-zinc-200 dark:border-zinc-800 rotate-45" />
 			</div>
 		)}
 		<div

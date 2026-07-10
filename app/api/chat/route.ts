@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 			: 28;
 
 	const result = streamText({
-		model: google("gemini-1.5-flash"),
+		model: google("gemini-2.5-flash-lite"),
 		messages: await convertToModelMessages(messages),
 		system: system
 			? `${baseSystemPrompt}\n\nAdditional instructions:\n${system}`

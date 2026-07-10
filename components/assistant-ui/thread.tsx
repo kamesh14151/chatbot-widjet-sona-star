@@ -9,6 +9,7 @@ import {
 	SuggestionPrimitive,
 	ThreadPrimitive,
 	useAuiState,
+	useComposerRuntime,
 } from "@assistant-ui/react";
 import {
 	ArrowDownIcon,
@@ -158,74 +159,101 @@ const Composer: FC = () => {
 	);
 };
 
-// ── Voice Recognition Hook ──────────────────────────────────────────
-type VoiceState = "idle" | "listening" | "unsupported";
-
-function useVoiceInput(onTranscript: (text: string) => void) {
-	const [voiceState, setVoiceState] = useState<VoiceState>("idle");
-	// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognition is not universally typed
-	const recognitionRef = useRef<any>(null);
+// ── Voice Recognition ──────────────────────────────────────────────────
+// Self-contained: reads composerRuntime directly from assistant-ui context
+// so the typed transcript is injected via the official API (not DOM hacks).
+const VoiceMicButton: FC = () => {
+	// biome-ignore lint/suspicious/noExplicitAny: useComposerRuntime returns opaque runtime
+	const composerRuntime = useComposerRuntime() as any;
+	const [listening, setListening] = useState(false);
+	const [supported, setSupported] = useState(true);
+	// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognition cross-browser
+	const recRef = useRef<any>(null);
+	// Keep a stable ref to the latest runtime to avoid stale closure in onresult
+	// biome-ignore lint/suspicious/noExplicitAny: runtime ref
+	const runtimeRef = useRef<any>(null);
+	runtimeRef.current = composerRuntime;
 
 	useEffect(() => {
-		// biome-ignore lint/suspicious/noExplicitAny: cross-browser speech API
+		// biome-ignore lint/suspicious/noExplicitAny: browser speech API
 		const w = window as any;
-		const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
-		if (!SpeechRecognitionAPI) {
-			setVoiceState("unsupported");
+		const API = w.SpeechRecognition || w.webkitSpeechRecognition;
+		if (!API) {
+			setSupported(false);
 			return;
 		}
 		// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognition instance
-		const rec: any = new SpeechRecognitionAPI();
+		const rec: any = new API();
 		rec.lang = "en-US";
+		rec.continuous = false;
 		rec.interimResults = false;
 		rec.maxAlternatives = 1;
-		// biome-ignore lint/suspicious/noExplicitAny: SpeechRecognitionEvent not typed
+
 		rec.onresult = (e: any) => {
-			const transcript: string = e.results[0][0].transcript;
-			onTranscript(transcript);
-			setVoiceState("idle");
+			const text: string = e.results[0][0].transcript;
+			// Use the official assistant-ui API to set composer text
+			const rt = runtimeRef.current;
+			if (rt) {
+				// setValue is the standard ComposerRuntime method
+				if (typeof rt.setValue === "function") rt.setValue(text);
+				else if (typeof rt.setText === "function") rt.setText(text);
+				else {
+					// Fallback: native React input event (last resort)
+					const ta = document.querySelector<HTMLTextAreaElement>(".aui-composer-input");
+					if (ta) {
+						const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+						setter?.call(ta, text);
+						ta.dispatchEvent(new InputEvent("input", { bubbles: true, data: text }));
+						ta.focus();
+					}
+				}
+			}
+			setListening(false);
 		};
-		rec.onerror = () => setVoiceState("idle");
-		rec.onend = () => setVoiceState("idle");
-		recognitionRef.current = rec;
-	}, [onTranscript]);
 
-	const toggle = useCallback(() => {
-		const rec = recognitionRef.current;
+		rec.onerror = (err: any) => {
+			console.warn("[VoiceMic] error:", err?.error);
+			setListening(false);
+		};
+		rec.onend = () => setListening(false);
+
+		recRef.current = rec;
+		return () => { try { rec.abort(); } catch (_) {} };
+	}, []); // only on mount
+
+	if (!supported) return null;
+
+	const toggle = () => {
+		const rec = recRef.current;
 		if (!rec) return;
-		if (voiceState === "listening") {
-			rec.stop();
-			setVoiceState("idle");
+		if (listening) {
+			try { rec.stop(); } catch (_) {}
+			setListening(false);
 		} else {
-			rec.start();
-			setVoiceState("listening");
+			try {
+				rec.start();
+				setListening(true);
+			} catch (_) {
+				setListening(false);
+			}
 		}
-	}, [voiceState]);
+	};
 
-	return { voiceState, toggle };
-}
-
-// ── Voice Mic Button ─────────────────────────────────────────────────
-const VoiceMicButton: FC<{ onTranscript: (text: string) => void }> = ({ onTranscript }) => {
-	const { voiceState, toggle } = useVoiceInput(onTranscript);
-	if (voiceState === "unsupported") return null;
-
-	const isListening = voiceState === "listening";
 	return (
 		<button
 			type="button"
 			onClick={toggle}
-			aria-label={isListening ? "Stop listening" : "Start voice input"}
-			title={isListening ? "Stop listening" : "Speak your message"}
+			aria-label={listening ? "Stop voice input" : "Start voice input"}
+			title={listening ? "Stop listening" : "Speak your message"}
 			className={
 				`flex size-8 items-center justify-center rounded-full transition-all duration-200 ${
-					isListening
+					listening
 						? "bg-[#a82229] text-white animate-pulse shadow-lg shadow-red-400/40"
 						: "bg-muted text-muted-foreground hover:bg-[#008276] hover:text-white"
 				}`
 			}
 		>
-			{isListening ? (
+			{listening ? (
 				<MicOffIcon className="size-4" />
 			) : (
 				<MicIcon className="size-4" />
@@ -234,29 +262,13 @@ const VoiceMicButton: FC<{ onTranscript: (text: string) => void }> = ({ onTransc
 	);
 };
 
-// ── Composer Input ref shim for voice fill ───────────────────────────
+// ── Composer Action Bar ─────────────────────────────────────────────────
 const ComposerAction: FC = () => {
-	// We inject the voice transcript directly into the ComposerPrimitive textarea
-	const handleTranscript = useCallback((text: string) => {
-		const textarea = document.querySelector<HTMLTextAreaElement>(
-			".aui-composer-input",
-		);
-		if (!textarea) return;
-		// Use native input setter so React state picks up the change
-		const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-			window.HTMLTextAreaElement.prototype,
-			"value",
-		)?.set;
-		nativeInputValueSetter?.call(textarea, text);
-		textarea.dispatchEvent(new Event("input", { bubbles: true }));
-		textarea.focus();
-	}, []);
-
 	return (
 		<div className="aui-composer-action-wrapper relative flex items-center justify-between">
 			<div className="flex items-center gap-1">
 				<ComposerAddAttachment />
-				<VoiceMicButton onTranscript={handleTranscript} />
+				<VoiceMicButton />
 			</div>
 			<AuiIf condition={(s) => !s.thread.isRunning}>
 				<ComposerPrimitive.Send asChild>

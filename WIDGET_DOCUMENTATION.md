@@ -60,6 +60,23 @@ Act as a professional technical product manager and developer. Write a comprehen
 
 The presentation should be designed for stakeholders and marketing teams. Provide slide titles, core talking points, visual layouts, and suggested screenshots for each slide.
 
+Here is the exact project context to include in the slides:
+- **Core Purpose:** Automate admissions support and lead generation for the MS in Data Science 1+1 International Pathway Program (Year 1 at SCALE Bengaluru, Year 2 at UWA Alabama).
+- **Features Implemented:**
+  1. *Greeting Flow:* Welcomes users, collects name, and dynamically routes them to their preferred language.
+  2. *Lead Capture Form:* Gathers Name, Email, and Phone. It can be skipped using the 'ESC' key or close button.
+  3. *AI Name Personalization:* Stores the user's name in a cookie, which is read by the backend API. The system prompt dynamically updates so the AI addresses the user by their actual name instead of a placeholder.
+  4. *Language Support:* Multilingual selectors for English, Tamil, Kannada, and Hindi.
+  5. *Voice Support:* Voice mic button built-in for speaking messages.
+  6. *Custom Design:* Glassmorphic message bubbles with high contrast, a custom watermark background (40% opacity), a red robot AI icon on the left of the header, and the SONA logo on the right.
+- **Embedded Architecture:** 
+  - Host websites copy-paste a single script: `<script src="https://chatbot-widjet.vercel.app/embed.js" defer></script>`.
+  - The script injects an isolated `iframe` to prevent CSS style leakage.
+  - The iframe auto-resizes dynamically via `postMessage` cross-origin events:
+    - *Closed State:* `180px` x `140px` (provides space for the launcher button and the "Chat with me" tooltip without blocking host website clicks).
+    - *Open State:* `430px` x `670px` (fits the full chat window).
+- **Technical Stack:** Next.js App Router (React 19), Tailwind CSS v4, Lucide Icons, `@assistant-ui/react` UI SDK, Google Gemini 2.5 Flash API, and Vercel Deployment.
+
 Use the following slide-by-slide structure:
 - Slide 1: Title Slide (Title: "SONA SCALE UWA Admissions Chatbot Widget", Subtitle: "Automating Student Support & Enrollment for the MS in Data Science 1+1 International Pathway Program", Presenter: "SCALE Bengaluru Admissions Team")
 - Slide 2: The Challenge (Why admissions queries are hard to handle manually and the need for 24/7 automation)

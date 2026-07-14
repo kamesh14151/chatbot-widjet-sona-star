@@ -130,6 +130,11 @@
 		color-scheme: dark;
 	}
 
+	html, body {
+		background-color: transparent !important;
+		background: transparent !important;
+	}
+
 	body {
 		@apply bg-transparent text-foreground;
 	}

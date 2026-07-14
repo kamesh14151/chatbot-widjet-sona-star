@@ -72,7 +72,7 @@ ModalButton.displayName = "ModalButton";
 export const AssistantModal = () => {
 	return (
 		<AssistantModalPrimitive.Root>
-			<AssistantModalPrimitive.Anchor className="fixed right-4 bottom-8 z-50 size-14">
+			<AssistantModalPrimitive.Anchor className="fixed right-4 bottom-8 z-50 size-14 bg-transparent shadow-none border-none">
 				<AssistantModalPrimitive.Trigger asChild>
 					<ModalButton />
 				</AssistantModalPrimitive.Trigger>

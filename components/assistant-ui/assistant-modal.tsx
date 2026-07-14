@@ -27,15 +27,27 @@ const ModalButton = forwardRef<
 		)}
 		<div
 			data-state={state}
-			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center p-0.5 transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
+			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
 		>
-			{/* UWA AI Tiger Icon */}
-			{/* eslint-disable-next-line @next/next/no-img-element */}
-			<img
-				src="/tiger-head-logo-icon-mascot-vector-illustration_194708-1660-removebg-preview.png"
-				alt="UWA AI"
-				className="size-full object-contain"
-			/>
+			{/* Robot AI Icon (shown when chat is closed) */}
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className="size-7" fill="none" aria-label="AI Chatbot">
+				{/* Head */}
+				<rect x="12" y="18" width="40" height="30" rx="6" fill="#a82229" />
+				{/* Antenna base */}
+				<rect x="30" y="10" width="4" height="8" rx="2" fill="#a82229" />
+				{/* Antenna ball */}
+				<circle cx="32" cy="9" r="3.5" fill="#ffffff" stroke="#a82229" strokeWidth="1.5" />
+				{/* Eyes */}
+				<circle cx="23" cy="30" r="5" fill="white" />
+				<circle cx="41" cy="30" r="5" fill="white" />
+				<circle cx="24" cy="31" r="2.5" fill="#a82229" />
+				<circle cx="42" cy="31" r="2.5" fill="#a82229" />
+				{/* Mouth */}
+				<rect x="21" y="39" width="22" height="3" rx="1.5" fill="white" opacity="0.6" />
+				{/* Ear bolts */}
+				<rect x="8" y="26" width="4" height="8" rx="2" fill="#a82229" />
+				<rect x="52" y="26" width="4" height="8" rx="2" fill="#a82229" />
+			</svg>
 		</div>
 		<XIcon
 			data-state={state}
@@ -65,8 +77,8 @@ export const AssistantModal = () => {
 						<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden p-0.5">
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img
-								src="/logo.png"
-								alt="SCALE UWA Logo"
+								src="/tiger-head-logo-icon-mascot-vector-illustration_194708-1660-removebg-preview.png"
+								alt="UWA AI"
 								className="size-full object-contain"
 							/>
 						</div>

@@ -73,25 +73,36 @@ export const AssistantModal = () => {
 				className="h-[550px] w-[400px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border bg-popover shadow-xl duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-bottom-4"
 			>
 				<div className="flex h-full flex-col">
-					<div className="bg-[#1a1a1a] border-t-4 border-[#a82229] px-4 py-3.5 shadow-sm flex items-center gap-3">
-						<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden p-0.5">
+					<div className="bg-[#1a1a1a] border-t-4 border-[#a82229] px-4 py-3.5 shadow-sm flex items-center justify-between gap-3">
+						<div className="flex items-center gap-3">
+							<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden p-0.5 shrink-0">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img
+									src="/tiger-head-logo-icon-mascot-vector-illustration_194708-1660-removebg-preview.png"
+									alt="UWA AI"
+									className="size-full object-contain"
+								/>
+							</div>
+							<div className="min-w-0">
+								<p className="text-sm font-semibold leading-none text-white tracking-wide flex items-center gap-1.5 truncate">
+									SCALE UWA
+									<svg className="size-3.5 fill-[#1D9BF0] text-white flex-shrink-0" viewBox="0 0 24 24" aria-label="Verified account">
+										<path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.99-3.818-3.99-.48 0-.94.1-1.348.27C14.825 2.515 13.512 1.5 12 1.5s-2.825 1.015-3.422 2.28c-.406-.17-.866-.27-1.348-.27-2.108 0-3.818 1.78-3.818 3.99 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.71 3.99 3.818 3.99.48 0 .94-.1 1.348-.27.597 1.265 1.91 2.27 3.422 2.27s2.825-1.005 3.422-2.27c.406.17.866.27 1.348.27 2.108 0 3.818-1.78 3.818-3.99 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6zm-12.5 4L6 12.5l1.5-1.5 2.5 2.5 6.5-6.5 1.5 1.5-8 8z" />
+									</svg>
+								</p>
+								<p className="mt-1 text-[10px] text-zinc-300 truncate">
+									Course guidance, admissions help
+								</p>
+							</div>
+						</div>
+						{/* Right corner image (compact) */}
+						<div className="shrink-0 flex items-center justify-center">
 							{/* eslint-disable-next-line @next/next/no-img-element */}
 							<img
-								src="/tiger-head-logo-icon-mascot-vector-illustration_194708-1660-removebg-preview.png"
-								alt="UWA AI"
-								className="size-full object-contain"
+								src="/1000183522.png"
+								alt="Sona"
+								className="h-7 object-contain"
 							/>
-						</div>
-						<div>
-							<p className="text-sm font-semibold leading-none text-white tracking-wide flex items-center gap-1.5">
-								SCALE UWA
-								<svg className="size-3.5 fill-[#1D9BF0] text-white flex-shrink-0" viewBox="0 0 24 24" aria-label="Verified account">
-									<path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.99-3.818-3.99-.48 0-.94.1-1.348.27C14.825 2.515 13.512 1.5 12 1.5s-2.825 1.015-3.422 2.28c-.406-.17-.866-.27-1.348-.27-2.108 0-3.818 1.78-3.818 3.99 0 .495.084.965.238 1.4-1.273.65-2.148 2.02-2.148 3.6 0 1.58.875 2.95 2.148 3.6-.154.435-.238.905-.238 1.4 0 2.21 1.71 3.99 3.818 3.99.48 0 .94-.1 1.348-.27.597 1.265 1.91 2.27 3.422 2.27s2.825-1.005 3.422-2.27c.406.17.866.27 1.348.27 2.108 0 3.818-1.78 3.818-3.99 0-.495-.084-.965-.238-1.4 1.273-.65 2.148-2.02 2.148-3.6zm-12.5 4L6 12.5l1.5-1.5 2.5 2.5 6.5-6.5 1.5 1.5-8 8z" />
-								</svg>
-							</p>
-							<p className="mt-1 text-[10px] text-zinc-300">
-								Course guidance, admissions help, and support links
-							</p>
 						</div>
 					</div>
 					<div className="min-h-0 flex-1">

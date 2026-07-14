@@ -538,7 +538,7 @@ const AssistantMessage: FC = () => {
 			className="aui-assistant-message-root fade-in slide-in-from-bottom-1 relative mx-auto w-full max-w-(--thread-max-width) animate-in py-3 duration-150"
 			data-role="assistant"
 		>
-			<div className="aui-assistant-message-content wrap-break-word px-2 text-foreground leading-relaxed">
+			<div className="aui-assistant-message-content wrap-break-word bg-white/95 dark:bg-zinc-900/95 shadow-sm border border-zinc-100 dark:border-zinc-800 rounded-2xl px-4 py-3 text-foreground leading-relaxed max-w-[95%] sm:max-w-[85%] backdrop-blur-sm">
 				<MessagePrimitive.Parts>
 					{({ part }) => {
 						if (part.type === "text") return <MarkdownText />;
@@ -617,7 +617,7 @@ const UserMessage: FC = () => {
 			<UserMessageAttachments />
 
 			<div className="aui-user-message-content-wrapper relative col-start-2 min-w-0">
-				<div className="aui-user-message-content wrap-break-word peer rounded-2xl bg-[#008276] px-4 py-2.5 text-white empty:hidden">
+				<div className="aui-user-message-content wrap-break-word peer rounded-2xl bg-[#008276] px-4 py-2.5 text-white empty:hidden shadow-sm backdrop-blur-sm">
 					<MessagePrimitive.Parts />
 				</div>
 				<div className="aui-user-action-bar-wrapper absolute top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-2 peer-empty:hidden">

@@ -259,7 +259,7 @@ export const Thread: FC = () => {
 					<img
 						src="/Gemini_Generated_Image_ewigp1ewigp1ewig.png"
 						alt=""
-						className="w-full h-full object-cover opacity-50 select-none"
+						className="w-full h-full object-cover opacity-50 select-none scale-[1.05] -translate-y-6"
 						aria-hidden="true"
 					/>
 				</div>
@@ -272,7 +272,7 @@ export const Thread: FC = () => {
 					{() => <ThreadMessage />}
 				</ThreadPrimitive.Messages>
 
-				<ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
+				<ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible pb-4 md:pb-6">
 					<ThreadScrollToBottom />
 					{!shouldShowForm && <LanguageSelector />}
 					{shouldShowForm ? (

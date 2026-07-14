@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 		: baseSystemPrompt;
 
 	if (userName) {
-		systemPrompt += `\n\nThe user's name is "${userName}". Address the user by their name.`;
+		systemPrompt += `\n\nThe user's name is "${userName}". Please address them by their name in your responses. If the greeting/language prompt (Step 2) has already been sent in the conversation history, do NOT repeat the greeting or language selection questions. Proceed directly to assisting the user.`;
 	}
 
 	const result = streamText({

@@ -1,12 +1,15 @@
 (function () {
   // Determine the URL of the widget based on where this script is loaded from
   const currentScript = document.currentScript;
-  let widgetUrl = "http://localhost:3000"; // Fallback
+  let widgetUrl = "https://chatbot-widjet.vercel.app"; // Default to production URL
 
   if (currentScript && currentScript.src) {
     try {
       const scriptUrl = new URL(currentScript.src);
-      widgetUrl = scriptUrl.origin;
+      // Only override if it's a valid http/https origin, this helps avoid issues with local files
+      if (scriptUrl.origin.startsWith("http")) {
+         widgetUrl = scriptUrl.origin;
+      }
     } catch (e) {
       console.warn("Could not parse script origin", e);
     }

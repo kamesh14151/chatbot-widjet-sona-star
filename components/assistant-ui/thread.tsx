@@ -253,6 +253,17 @@ export const Thread: FC = () => {
 				turnAnchor="top"
 				className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll scroll-smooth px-4 pt-4"
 			>
+				{/* Watermark */}
+				<div className="pointer-events-none absolute inset-0 flex items-center justify-center z-0">
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img
+						src="/Gemini_Generated_Image_ewigp1ewigp1ewig.png"
+						alt=""
+						className="w-48 h-48 object-contain opacity-[0.08] select-none"
+						aria-hidden="true"
+					/>
+				</div>
+
 				<AuiIf condition={(s) => s.thread.isEmpty}>
 					<ThreadWelcome />
 				</AuiIf>

@@ -30,7 +30,7 @@ export const Assistant = () => {
 
 	return (
 		<AssistantRuntimeProvider runtime={runtime}>
-			<div className="relative h-dvh w-full bg-background">
+			<div className="relative h-dvh w-full bg-transparent">
 				<AssistantModal />
 			</div>
 		</AssistantRuntimeProvider>

@@ -50,7 +50,7 @@
         } else {
            // Desktop size
            iframe.style.width = "430px";
-           iframe.style.height = "620px";
+           iframe.style.height = "670px";
            iframe.style.bottom = "10px";
            iframe.style.right = "10px";
         }
@@ -75,7 +75,7 @@
         iframe.style.right = "0";
       } else {
         iframe.style.width = "430px";
-        iframe.style.height = "620px";
+        iframe.style.height = "670px";
         iframe.style.bottom = "10px";
         iframe.style.right = "10px";
       }

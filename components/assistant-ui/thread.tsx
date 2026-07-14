@@ -273,7 +273,7 @@ export const Thread: FC = () => {
 					{() => <ThreadMessage />}
 				</ThreadPrimitive.Messages>
 
-				<ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible pb-4 md:pb-6">
+				<ThreadPrimitive.ViewportFooter className="aui-thread-viewport-footer sticky bottom-0 mx-auto mt-auto flex w-full max-w-(--thread-max-width) flex-col gap-4 overflow-visible rounded-t-(--composer-radius) bg-background pb-4 md:pb-6">
 					<ThreadScrollToBottom />
 					{!shouldShowForm && <LanguageSelector />}
 					{shouldShowForm ? (
@@ -362,49 +362,17 @@ const Composer: FC = () => {
 			<ComposerPrimitive.AttachmentDropzone asChild>
 				<div
 					data-slot="composer-shell"
-					className="flex w-full items-center gap-2 rounded-(--composer-radius) border bg-background px-3 py-1.5 transition-shadow focus-within:border-ring/75 focus-within:ring-2 focus-within:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50"
+					className="flex w-full flex-col gap-2 rounded-(--composer-radius) border bg-background p-(--composer-padding) transition-shadow focus-within:border-ring/75 focus-within:ring-2 focus-within:ring-ring/20 data-[dragging=true]:border-ring data-[dragging=true]:border-dashed data-[dragging=true]:bg-accent/50"
 				>
-					<div className="flex items-center gap-1 shrink-0">
-						<ComposerAddAttachment />
-						<VoiceMicButton />
-					</div>
+					<ComposerAttachments />
 					<ComposerPrimitive.Input
 						placeholder="Send a message..."
-						className="aui-composer-input max-h-24 min-h-8 flex-1 resize-none bg-transparent py-1.5 text-sm outline-none placeholder:text-muted-foreground/80 align-middle"
+						className="aui-composer-input max-h-32 min-h-10 w-full resize-none bg-transparent px-1.75 py-1 text-sm outline-none placeholder:text-muted-foreground/80"
 						rows={1}
 						autoFocus
 						aria-label="Message input"
 					/>
-					<div className="shrink-0 flex items-center">
-						<AuiIf condition={(s) => !s.thread.isRunning}>
-							<ComposerPrimitive.Send asChild>
-								<TooltipIconButton
-									tooltip="Send message"
-									side="bottom"
-									type="button"
-									variant="default"
-									size="icon"
-									className="aui-composer-send size-8 rounded-full"
-									aria-label="Send message"
-								>
-									<ArrowUpIcon className="aui-composer-send-icon size-4" />
-								</TooltipIconButton>
-							</ComposerPrimitive.Send>
-						</AuiIf>
-						<AuiIf condition={(s) => s.thread.isRunning}>
-							<ComposerPrimitive.Cancel asChild>
-								<Button
-									type="button"
-									variant="default"
-									size="icon"
-									className="aui-composer-cancel size-8 rounded-full"
-									aria-label="Stop generating"
-								>
-									<SquareIcon className="aui-composer-cancel-icon size-3 fill-current" />
-								</Button>
-							</ComposerPrimitive.Cancel>
-						</AuiIf>
-					</div>
+					<ComposerAction />
 				</div>
 			</ComposerPrimitive.AttachmentDropzone>
 		</ComposerPrimitive.Root>

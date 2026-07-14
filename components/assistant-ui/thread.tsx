@@ -262,7 +262,7 @@ export const Thread: FC = () => {
 			</div>
 
 			<ThreadPrimitive.Viewport
-				turnAnchor="top"
+				turnAnchor="bottom"
 				className="aui-thread-viewport relative z-10 flex flex-1 flex-col overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
 			>
 

@@ -95,12 +95,21 @@ const LanguageSelector: FC = () => {
 	);
 };
 
-const LeadCaptureForm: FC<{ onSubmit: () => void }> = ({ onSubmit }) => {
+const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onSubmit, onSkip }) => {
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [phone, setPhone] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+
+	// Allow ESC key to skip the form
+	useEffect(() => {
+		const handleKey = (e: KeyboardEvent) => {
+			if (e.key === "Escape") onSkip();
+		};
+		window.addEventListener("keydown", handleKey);
+		return () => window.removeEventListener("keydown", handleKey);
+	}, [onSkip]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -137,7 +146,21 @@ const LeadCaptureForm: FC<{ onSubmit: () => void }> = ({ onSubmit }) => {
 			onSubmit={handleSubmit}
 			className="w-full flex flex-col gap-3 p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl shadow-lg animate-in fade-in zoom-in-95 duration-200"
 		>
-			<div className="text-center">
+			<div className="relative text-center">
+				{/* ESC / Skip button */}
+				<button
+					type="button"
+					onClick={onSkip}
+					title="Skip (ESC)"
+					aria-label="Skip contact form"
+					className="absolute -top-1 right-0 flex items-center gap-1 text-[10px] text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer select-none"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+						<line x1="18" y1="6" x2="6" y2="18" />
+						<line x1="6" y1="6" x2="18" y2="18" />
+					</svg>
+					<span className="font-semibold">ESC</span>
+				</button>
 				<h3 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">
 					Contact Details Required
 				</h3>
@@ -242,7 +265,10 @@ export const Thread: FC = () => {
 					<ThreadScrollToBottom />
 					{!shouldShowForm && <LanguageSelector />}
 					{shouldShowForm ? (
-						<LeadCaptureForm onSubmit={() => setHasSubmittedDetails(true)} />
+						<LeadCaptureForm
+							onSubmit={() => setHasSubmittedDetails(true)}
+							onSkip={() => setHasSubmittedDetails(true)}
+						/>
 					) : (
 						<Composer />
 					)}

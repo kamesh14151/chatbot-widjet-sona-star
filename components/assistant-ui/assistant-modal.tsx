@@ -27,14 +27,18 @@ const ModalButton = forwardRef<
 		)}
 		<div
 			data-state={state}
-			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center p-1 transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
+			className="absolute inset-0 m-auto size-10 rounded-full bg-white flex items-center justify-center transition-all duration-200 data-[state=open]:scale-0 data-[state=open]:rotate-90"
 		>
-			{/* eslint-disable-next-line @next/next/no-img-element */}
-			<img
-				src="/logo.png"
-				alt="SCALE UWA Logo"
-				className="size-full object-contain"
-			/>
+			{/* Chatbot speech-bubble icon */}
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				className="size-6 text-[#a82229]"
+				fill="currentColor"
+				aria-label="Chat"
+			>
+				<path d="M12 2C6.477 2 2 6.037 2 11c0 2.613 1.168 4.966 3.047 6.618L4 22l4.906-2.453A10.7 10.7 0 0 0 12 20c5.523 0 10-4.037 10-9S17.523 2 12 2Zm-3 10a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm3 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm3 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
+			</svg>
 		</div>
 		<XIcon
 			data-state={state}

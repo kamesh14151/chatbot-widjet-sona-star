@@ -61,16 +61,16 @@ Act as a professional technical product manager and developer. Write a comprehen
 The presentation should be designed for stakeholders and marketing teams. Provide slide titles, core talking points, visual layouts, and suggested screenshots for each slide.
 
 Use the following slide-by-slide structure:
-- Slide 1: Title Slide (Product Name, Subtitle, Author/Presenter)
+- Slide 1: Title Slide (Title: "SONA SCALE UWA Admissions Chatbot Widget", Subtitle: "Automating Student Support & Enrollment for the MS in Data Science 1+1 International Pathway Program", Presenter: "SCALE Bengaluru Admissions Team")
 - Slide 2: The Challenge (Why admissions queries are hard to handle manually and the need for 24/7 automation)
 - Slide 3: Introducing the SONA SCALE UWA Chatbot (Core purpose: 1+1 International Pathway program assistant)
-- Slide 4: Key Features & Capabilities (Gemini AI intelligence, lead capture forms, multillilingual support, voice recognition, custom branding)
+- Slide 4: Key Features & Capabilities (Gemini AI intelligence, lead capture forms, multilingual support, voice recognition, custom branding)
 - Slide 5: Embedded Integration Architecture (Explain the embed.js script, iframe isolation, auto-resizing controller, and zero-maintenance updates)
 - Slide 6: User Journey Flow (Greeting -> Contact Form -> Language Preference -> Interactive Q&A)
 - Slide 7: Visual Customizations (Custom branding: Sona brand logos, custom AI icons, watermark, and high-contrast bubble styling)
 - Slide 8: Technical Stack (Next.js, Tailwind CSS v4, @assistant-ui/react, Vercel deployment, Biome, and Gemini 2.5 Flash API)
 - Slide 9: Implementation Code (Show the simple script tag copy-paste integration code)
-- Slide 10: Conclusion & Next Steps (Contact information, deployment status, and future roadmap)
+- Slide 10: Conclusion & Next Steps (Contact Info: sonauwa@sonastar.com / +91 9442592170, Deployment: Live on Vercel, Integration Status: Ready for Production)
 
 Format the output clearly with Slide Headings, Visual Guidance, and slide content.
 ```

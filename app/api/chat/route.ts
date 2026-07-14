@@ -8,8 +8,11 @@ import {
 	type UIMessage,
 } from "ai";
 import { buildSonaStarSystemPrompt } from "@/lib/datasets/sona-star-faq";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
+	const cookieStore = await cookies();
+	const userName = cookieStore.get("scale_uwa_user_name")?.value ? decodeURIComponent(cookieStore.get("scale_uwa_user_name")!.value) : "";
 	const apiKey =
 		process.env.GEMINI_API_KEY ?? process.env.GOOGLE_GENERATIVE_AI_API_KEY;
 
@@ -41,12 +44,18 @@ export async function POST(req: Request) {
 			? configuredDelay
 			: 28;
 
+	let systemPrompt = system
+		? `${baseSystemPrompt}\n\nAdditional instructions:\n${system}`
+		: baseSystemPrompt;
+
+	if (userName) {
+		systemPrompt += `\n\nThe user's name is "${userName}". Address the user by their name.`;
+	}
+
 	const result = streamText({
 		model: google("gemini-2.5-flash-lite"),
 		messages: await convertToModelMessages(messages),
-		system: system
-			? `${baseSystemPrompt}\n\nAdditional instructions:\n${system}`
-			: baseSystemPrompt,
+		system: systemPrompt,
 		tools: {
 			...frontendTools(tools ?? {}),
 		},

@@ -133,6 +133,7 @@ const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onS
 				throw new Error(data.error || "Submission failed.");
 			}
 			sessionStorage.setItem("scale_uwa_lead_submitted", "true");
+			document.cookie = `scale_uwa_user_name=${encodeURIComponent(name)}; path=/; max-age=86400; SameSite=Lax`;
 			onSubmit();
 		} catch (err: any) {
 			setError(err.message || "Failed to submit details.");

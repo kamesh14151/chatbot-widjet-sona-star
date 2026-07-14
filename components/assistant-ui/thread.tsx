@@ -255,7 +255,7 @@ export const Thread: FC = () => {
 				<img
 					src="/Gemini_Generated_Image_ewigp1ewigp1ewig.png"
 					alt=""
-					className="w-full h-full object-cover opacity-50 select-none scale-[1.05] -translate-y-6"
+					className="w-full h-full object-cover object-[center_80%] opacity-50 select-none"
 					aria-hidden="true"
 				/>
 			</div>

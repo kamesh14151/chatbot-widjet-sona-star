@@ -75,13 +75,26 @@ export const AssistantModal = () => {
 				<div className="flex h-full flex-col">
 					<div className="bg-[#1a1a1a] border-t-4 border-[#a82229] px-4 py-3.5 shadow-sm flex items-center justify-between gap-3">
 						<div className="flex items-center gap-3">
-							<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden p-0.5 shrink-0">
-								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img
-									src="/tiger-head-logo-icon-mascot-vector-illustration_194708-1660-removebg-preview.png"
-									alt="UWA AI"
-									className="size-full object-contain"
-								/>
+							<div className="flex size-9 items-center justify-center rounded-full bg-white overflow-hidden shrink-0">
+								{/* Robot AI Icon */}
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" className="size-7" fill="none" aria-label="AI Chatbot">
+									{/* Head */}
+									<rect x="12" y="18" width="40" height="30" rx="6" fill="#a82229" />
+									{/* Antenna base */}
+									<rect x="30" y="10" width="4" height="8" rx="2" fill="#a82229" />
+									{/* Antenna ball */}
+									<circle cx="32" cy="9" r="3.5" fill="#ffffff" stroke="#a82229" strokeWidth="1.5" />
+									{/* Eyes */}
+									<circle cx="23" cy="30" r="5" fill="white" />
+									<circle cx="41" cy="30" r="5" fill="white" />
+									<circle cx="24" cy="31" r="2.5" fill="#a82229" />
+									<circle cx="42" cy="31" r="2.5" fill="#a82229" />
+									{/* Mouth */}
+									<rect x="21" y="39" width="22" height="3" rx="1.5" fill="white" opacity="0.6" />
+									{/* Ear bolts */}
+									<rect x="8" y="26" width="4" height="8" rx="2" fill="#a82229" />
+									<rect x="52" y="26" width="4" height="8" rx="2" fill="#a82229" />
+								</svg>
 							</div>
 							<div className="min-w-0">
 								<p className="text-sm font-semibold leading-none text-white tracking-wide flex items-center gap-1.5 truncate">

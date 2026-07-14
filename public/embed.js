@@ -21,8 +21,8 @@
   iframe.style.position = "fixed";
   iframe.style.bottom = "10px";
   iframe.style.right = "10px";
-  iframe.style.width = "100px";
-  iframe.style.height = "100px";
+  iframe.style.width = "180px";
+  iframe.style.height = "140px";
   iframe.style.border = "none";
   iframe.style.zIndex = "2147483647"; // Max z-index to stay on top
   iframe.style.background = "transparent";
@@ -55,9 +55,9 @@
            iframe.style.right = "10px";
         }
       } else {
-        // When closed, shrink back to button size
-        iframe.style.width = "100px";
-        iframe.style.height = "100px";
+        // When closed, shrink back to button size (with extra padding for tooltip)
+        iframe.style.width = "180px";
+        iframe.style.height = "140px";
         iframe.style.bottom = "10px";
         iframe.style.right = "10px";
       }
@@ -66,8 +66,8 @@
 
   // Handle window resizing to adjust mobile view if open
   window.addEventListener("resize", () => {
-    // If it's larger than 100px, it means it's open
-    if (iframe.style.width !== "100px") {
+    // If it's larger than 180px, it means it's open
+    if (iframe.style.width !== "180px") {
       if (window.innerWidth <= 450) {
         iframe.style.width = "100vw";
         iframe.style.height = "100vh";

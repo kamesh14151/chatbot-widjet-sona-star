@@ -101,7 +101,7 @@ export const AssistantModal = () => {
 							<img
 								src="/1000183522.png"
 								alt="Sona"
-								className="h-7 object-contain"
+								className="h-10 object-contain"
 							/>
 						</div>
 					</div>

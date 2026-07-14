@@ -242,27 +242,28 @@ export const Thread: FC = () => {
 
 	return (
 		<ThreadPrimitive.Root
-			className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
+			className="aui-root aui-thread-root @container flex h-full flex-col bg-background relative overflow-hidden"
 			style={{
 				["--thread-max-width" as string]: "44rem",
 				["--composer-radius" as string]: "24px",
 				["--composer-padding" as string]: "10px",
 			}}
 		>
+			{/* Watermark */}
+			<div className="pointer-events-none absolute inset-0 flex items-center justify-center z-0">
+				{/* eslint-disable-next-line @next/next/no-img-element */}
+				<img
+					src="/Gemini_Generated_Image_ewigp1ewigp1ewig.png"
+					alt=""
+					className="w-full h-full object-cover opacity-50 select-none scale-[1.05] -translate-y-6"
+					aria-hidden="true"
+				/>
+			</div>
+
 			<ThreadPrimitive.Viewport
 				turnAnchor="top"
-				className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+				className="aui-thread-viewport relative z-10 flex flex-1 flex-col overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
 			>
-				{/* Watermark */}
-				<div className="pointer-events-none absolute inset-0 flex items-center justify-center z-0 overflow-hidden">
-					{/* eslint-disable-next-line @next/next/no-img-element */}
-					<img
-						src="/Gemini_Generated_Image_ewigp1ewigp1ewig.png"
-						alt=""
-						className="w-full h-full object-cover opacity-50 select-none scale-[1.05] -translate-y-6"
-						aria-hidden="true"
-					/>
-				</div>
 
 				<AuiIf condition={(s) => s.thread.isEmpty}>
 					<ThreadWelcome />

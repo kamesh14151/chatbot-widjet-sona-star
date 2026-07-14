@@ -1,12 +1,22 @@
 import { AssistantModalPrimitive } from "@assistant-ui/react";
 import { XIcon } from "lucide-react";
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { Thread } from "@/components/assistant-ui/thread";
 
 const ModalButton = forwardRef<
 	HTMLButtonElement,
 	React.ComponentPropsWithoutRef<"button"> & { "data-state"?: string }
->(({ "data-state": state, ...props }, ref) => (
+>(({ "data-state": state, ...props }, ref) => {
+	useEffect(() => {
+		if (typeof window !== "undefined" && window.parent !== window) {
+			window.parent.postMessage(
+				{ type: "CHATBOT_STATE_CHANGE", isOpen: state === "open" },
+				"*"
+			);
+		}
+	}, [state]);
+
+	return (
 	<button
 		ref={ref}
 		type="button"
@@ -54,7 +64,8 @@ const ModalButton = forwardRef<
 			className="absolute inset-0 m-auto size-6 transition-all duration-200 data-[state=closed]:scale-0 data-[state=closed]:-rotate-90"
 		/>
 	</button>
-));
+	);
+});
 
 ModalButton.displayName = "ModalButton";
 

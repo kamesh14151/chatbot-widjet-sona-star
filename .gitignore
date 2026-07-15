@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Turborepo
 .turbo
+
+# local live chat database
+live-chats.json

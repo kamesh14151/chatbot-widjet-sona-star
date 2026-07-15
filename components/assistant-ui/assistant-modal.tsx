@@ -134,7 +134,7 @@ export const AssistantModal = () => {
 
 	const handleLiveAgentClick = () => {
 		const savedName = sessionStorage.getItem("scale_uwa_user_name") || studentName || "Guest Student";
-		const savedEmail = sessionStorage.getItem("scale_uwa_user_email") || "guest@sonascaler.uwa";
+		const savedEmail = sessionStorage.getItem("scale_uwa_user_email") || "guest@sonascale.uwa";
 		const savedPhone = sessionStorage.getItem("scale_uwa_user_phone") || "0000000000";
 
 		initSession(savedName, savedEmail, savedPhone);
@@ -174,7 +174,7 @@ export const AssistantModal = () => {
 								</div>
 								<div className="min-w-0">
 									<h2 className="text-xs font-bold leading-none text-slate-800 dark:text-zinc-100 tracking-wide uppercase truncate">
-										SONA SCALER UWA
+										SONA SCALE UWA
 									</h2>
 									<p className="mt-1 text-[9px] text-slate-500 dark:text-zinc-400 truncate">
 										Admissions, cutoffs, scholarships, courses

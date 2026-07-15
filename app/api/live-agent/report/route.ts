@@ -3,7 +3,7 @@ import { LiveChatDb } from '@/lib/live-chat-db';
 
 export async function GET() {
 	try {
-		const sessions = Object.values(LiveChatDb.getSessions());
+		const sessions = Object.values(await LiveChatDb.getSessions());
 		const activeCount = sessions.filter(s => s.status === 'active').length;
 		const waitingCount = sessions.filter(s => s.status === 'waiting').length;
 		const resolvedCount = sessions.filter(s => s.status === 'resolved').length;

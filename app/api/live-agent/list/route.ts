@@ -3,7 +3,7 @@ import { LiveChatDb } from '@/lib/live-chat-db';
 
 export async function GET() {
 	try {
-		const sessionsObj = LiveChatDb.getSessions();
+		const sessionsObj = await LiveChatDb.getSessions();
 		const sessionsList = Object.values(sessionsObj);
 
 		// Sort by last active timestamp descending

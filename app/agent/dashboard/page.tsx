@@ -232,7 +232,7 @@ export default function AgentDashboard() {
 		<div className="min-h-screen bg-[#edf3f6] dark:bg-zinc-950 flex flex-col font-sans text-slate-800 dark:text-zinc-100">
 			<header className="bg-[#fff7cd] dark:bg-zinc-900 border-b border-[#ebd7a3] dark:border-zinc-800 px-6 py-4 flex items-center shrink-0">
 				<h1 className="text-sm font-bold tracking-wide uppercase">
-					SONA SCALER UWA
+					SONA SCALE UWA
 				</h1>
 			</header>
 

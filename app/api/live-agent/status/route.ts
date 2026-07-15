@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 		}
 
 		if (status === 'resolved') {
-			const success = LiveChatDb.resolveSession(sessionId);
+			const success = await LiveChatDb.resolveSession(sessionId);
 			if (!success) {
 				return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 			}

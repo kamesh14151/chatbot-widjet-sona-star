@@ -39,7 +39,7 @@ export default function AgentLogin() {
 		<div className="min-h-screen bg-[#fff7cd] dark:bg-zinc-950 flex flex-col font-sans">
 			<header className="bg-[#fff7cd] dark:bg-zinc-900 px-6 py-4 shrink-0 flex items-center shadow-sm">
 				<h1 className="text-sm font-bold text-slate-800 dark:text-zinc-100 tracking-wide uppercase">
-					SONA SCALER UWA
+					SONA SCALE UWA
 				</h1>
 			</header>
 

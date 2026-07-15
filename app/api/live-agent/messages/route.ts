@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: 'Missing sessionId parameter' }, { status: 400 });
 	}
 
-	const session = LiveChatDb.getSession(sessionId);
+	const session = await LiveChatDb.getSession(sessionId);
 	if (!session) {
 		return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 	}
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'Missing required fields (sessionId, sender, senderName, text)' }, { status: 400 });
 		}
 
-		const message = LiveChatDb.addMessage(sessionId, sender, senderName, text);
+		const message = await LiveChatDb.addMessage(sessionId, sender, senderName, text);
 		if (!message) {
 			return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 		}

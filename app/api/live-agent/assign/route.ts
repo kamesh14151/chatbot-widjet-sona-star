@@ -10,7 +10,7 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: 'Missing required fields (sessionId, agentEmail)' }, { status: 400 });
 		}
 
-		const success = LiveChatDb.assignAgent(sessionId, agentEmail);
+		const success = await LiveChatDb.assignAgent(sessionId, agentEmail);
 		if (!success) {
 			return NextResponse.json({ error: 'Session not found' }, { status: 404 });
 		}

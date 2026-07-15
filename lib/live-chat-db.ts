@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { supabase } from './supabase';
 
 export interface ChatMessage {
 	id: string;
@@ -169,8 +170,43 @@ const getInitialMockSessions = (): Record<string, ChatSession> => {
 	};
 };
 
+const isSupabaseEnabled = () => {
+	return !!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+};
+
+// Map database snake_case columns to ChatSession properties
+function mapDbToSession(row: any): ChatSession {
+	return {
+		id: row.id,
+		userName: row.user_name,
+		userEmail: row.user_email,
+		userPhone: row.user_phone,
+		status: row.status,
+		assignedAgent: row.assigned_agent,
+		messages: Array.isArray(row.messages) ? row.messages : [],
+		createdAt: Number(row.created_at),
+		lastActive: Number(row.last_active)
+	};
+}
+
+// Map ChatSession properties to database snake_case columns
+function mapSessionToDb(session: ChatSession) {
+	return {
+		id: session.id,
+		user_name: session.userName,
+		user_email: session.userEmail,
+		user_phone: session.userPhone,
+		status: session.status,
+		assigned_agent: session.assignedAgent,
+		messages: session.messages,
+		created_at: session.createdAt,
+		last_active: session.lastActive
+	};
+}
+
 export class LiveChatDb {
-	static getSessions(): Record<string, ChatSession> {
+	// Local File Sync DB Methods
+	private static getLocalSessions(): Record<string, ChatSession> {
 		try {
 			if (!fs.existsSync(DB_FILE)) {
 				const mockSessions = getInitialMockSessions();
@@ -185,7 +221,7 @@ export class LiveChatDb {
 		}
 	}
 
-	static saveSessions(sessions: Record<string, ChatSession>): void {
+	private static saveLocalSessions(sessions: Record<string, ChatSession>): void {
 		try {
 			fs.writeFileSync(DB_FILE, JSON.stringify(sessions, null, 2), 'utf-8');
 		} catch (error) {
@@ -193,13 +229,58 @@ export class LiveChatDb {
 		}
 	}
 
-	static getSession(id: string): ChatSession | null {
-		const sessions = this.getSessions();
-		return sessions[id] || null;
+	// Async API Methods Supporting Supabase & File Fallback
+	static async getSessions(): Promise<Record<string, ChatSession>> {
+		if (isSupabaseEnabled()) {
+			try {
+				const { data, error } = await supabase
+					.from('chat_sessions')
+					.select('*');
+				
+				if (error) {
+					console.error("Error fetching sessions from Supabase:", error);
+					return this.getLocalSessions();
+				}
+
+				const sessions: Record<string, ChatSession> = {};
+				for (const row of data || []) {
+					sessions[row.id] = mapDbToSession(row);
+				}
+				return sessions;
+			} catch (error) {
+				console.error("Failed to query Supabase, falling back to local file:", error);
+				return this.getLocalSessions();
+			}
+		} else {
+			return this.getLocalSessions();
+		}
 	}
 
-	static createSession(id: string, name: string, email: string, phone: string): ChatSession {
-		const sessions = this.getSessions();
+	static async getSession(id: string): Promise<ChatSession | null> {
+		if (isSupabaseEnabled()) {
+			try {
+				const { data, error } = await supabase
+					.from('chat_sessions')
+					.select('*')
+					.eq('id', id)
+					.maybeSingle();
+
+				if (error) {
+					console.error("Error fetching session from Supabase:", error);
+					return this.getLocalSessions()[id] || null;
+				}
+
+				return data ? mapDbToSession(data) : null;
+			} catch (error) {
+				console.error("Failed to query Supabase, falling back to local file:", error);
+				return this.getLocalSessions()[id] || null;
+			}
+		} else {
+			return this.getLocalSessions()[id] || null;
+		}
+	}
+
+	static async createSession(id: string, name: string, email: string, phone: string): Promise<ChatSession> {
 		const now = Date.now();
 		const newSession: ChatSession = {
 			id,
@@ -220,14 +301,38 @@ export class LiveChatDb {
 				}
 			]
 		};
-		sessions[id] = newSession;
-		this.saveSessions(sessions);
+
+		if (isSupabaseEnabled()) {
+			try {
+				const dbRecord = mapSessionToDb(newSession);
+				const { error } = await supabase
+					.from('chat_sessions')
+					.upsert(dbRecord);
+
+				if (error) {
+					console.error("Error creating session in Supabase:", error);
+					// Save to local file as fallback
+					const sessions = this.getLocalSessions();
+					sessions[id] = newSession;
+					this.saveLocalSessions(sessions);
+				}
+			} catch (error) {
+				console.error("Failed to save to Supabase, falling back to local file:", error);
+				const sessions = this.getLocalSessions();
+				sessions[id] = newSession;
+				this.saveLocalSessions(sessions);
+			}
+		} else {
+			const sessions = this.getLocalSessions();
+			sessions[id] = newSession;
+			this.saveLocalSessions(sessions);
+		}
+
 		return newSession;
 	}
 
-	static addMessage(sessionId: string, sender: 'student' | 'agent' | 'system' | 'ai', senderName: string, text: string): ChatMessage | null {
-		const sessions = this.getSessions();
-		const session = sessions[sessionId];
+	static async addMessage(sessionId: string, sender: 'student' | 'agent' | 'system' | 'ai', senderName: string, text: string): Promise<ChatMessage | null> {
+		const session = await this.getSession(sessionId);
 		if (!session) return null;
 
 		const now = Date.now();
@@ -241,14 +346,41 @@ export class LiveChatDb {
 
 		session.messages.push(message);
 		session.lastActive = now;
-		sessions[sessionId] = session;
-		this.saveSessions(sessions);
+
+		if (isSupabaseEnabled()) {
+			try {
+				const { error } = await supabase
+					.from('chat_sessions')
+					.update({
+						messages: session.messages,
+						last_active: now
+					})
+					.eq('id', sessionId);
+
+				if (error) {
+					console.error("Error adding message in Supabase:", error);
+					// Save to local file as fallback
+					const sessions = this.getLocalSessions();
+					sessions[sessionId] = session;
+					this.saveLocalSessions(sessions);
+				}
+			} catch (error) {
+				console.error("Failed to save message to Supabase, falling back to local file:", error);
+				const sessions = this.getLocalSessions();
+				sessions[sessionId] = session;
+				this.saveLocalSessions(sessions);
+			}
+		} else {
+			const sessions = this.getLocalSessions();
+			sessions[sessionId] = session;
+			this.saveLocalSessions(sessions);
+		}
+
 		return message;
 	}
 
-	static assignAgent(sessionId: string, agentEmail: string): boolean {
-		const sessions = this.getSessions();
-		const session = sessions[sessionId];
+	static async assignAgent(sessionId: string, agentEmail: string): Promise<boolean> {
+		const session = await this.getSession(sessionId);
 		if (!session) return false;
 
 		const now = Date.now();
@@ -263,14 +395,44 @@ export class LiveChatDb {
 			timestamp: now
 		});
 
-		sessions[sessionId] = session;
-		this.saveSessions(sessions);
-		return true;
+		if (isSupabaseEnabled()) {
+			try {
+				const { error } = await supabase
+					.from('chat_sessions')
+					.update({
+						assigned_agent: agentEmail,
+						status: 'active',
+						last_active: now,
+						messages: session.messages
+					})
+					.eq('id', sessionId);
+
+				if (error) {
+					console.error("Error assigning agent in Supabase:", error);
+					// Save to local file as fallback
+					const sessions = this.getLocalSessions();
+					sessions[sessionId] = session;
+					this.saveLocalSessions(sessions);
+					return false;
+				}
+				return true;
+			} catch (error) {
+				console.error("Failed to update Supabase, falling back to local file:", error);
+				const sessions = this.getLocalSessions();
+				sessions[sessionId] = session;
+				this.saveLocalSessions(sessions);
+				return false;
+			}
+		} else {
+			const sessions = this.getLocalSessions();
+			sessions[sessionId] = session;
+			this.saveLocalSessions(sessions);
+			return true;
+		}
 	}
 
-	static resolveSession(sessionId: string): boolean {
-		const sessions = this.getSessions();
-		const session = sessions[sessionId];
+	static async resolveSession(sessionId: string): Promise<boolean> {
+		const session = await this.getSession(sessionId);
 		if (!session) return false;
 
 		const now = Date.now();
@@ -284,8 +446,38 @@ export class LiveChatDb {
 			timestamp: now
 		});
 
-		sessions[sessionId] = session;
-		this.saveSessions(sessions);
-		return true;
+		if (isSupabaseEnabled()) {
+			try {
+				const { error } = await supabase
+					.from('chat_sessions')
+					.update({
+						status: 'resolved',
+						last_active: now,
+						messages: session.messages
+					})
+					.eq('id', sessionId);
+
+				if (error) {
+					console.error("Error resolving session in Supabase:", error);
+					// Save to local file as fallback
+					const sessions = this.getLocalSessions();
+					sessions[sessionId] = session;
+					this.saveLocalSessions(sessions);
+					return false;
+				}
+				return true;
+			} catch (error) {
+				console.error("Failed to update Supabase, falling back to local file:", error);
+				const sessions = this.getLocalSessions();
+				sessions[sessionId] = session;
+				this.saveLocalSessions(sessions);
+				return false;
+			}
+		} else {
+			const sessions = this.getLocalSessions();
+			sessions[sessionId] = session;
+			this.saveLocalSessions(sessions);
+			return true;
+		}
 	}
 }

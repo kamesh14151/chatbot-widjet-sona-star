@@ -2,8 +2,16 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { SearchIcon, Loader2Icon, SendIcon, PowerIcon, BarChart2Icon, UsersIcon, ShieldIcon, CheckCircleIcon } from 'lucide-react';
+import { SearchIcon, Loader2Icon, SendIcon, PowerIcon, BarChart2Icon, UsersIcon, ShieldIcon, CheckCircleIcon, DatabaseIcon } from 'lucide-react';
 import { ChatSession, ChatMessage } from '@/lib/live-chat-db';
+
+interface DbStatus {
+	connected: boolean;
+	status: 'ready' | 'no_tables' | 'misconfigured' | 'error' | 'checking';
+	message: string;
+	latencyMs: number | null;
+	checkedAt: string;
+}
 
 export default function AgentDashboard() {
 	const router = useRouter();
@@ -18,6 +26,13 @@ export default function AgentDashboard() {
 	const [agentEmail, setAgentEmail] = useState('agent@sona.com');
 	const [agentRole, setAgentRole] = useState('agent');
 	const messagesEndRef = useRef<HTMLDivElement>(null);
+	const [dbStatus, setDbStatus] = useState<DbStatus>({
+		connected: false,
+		status: 'checking',
+		message: 'Checking connection…',
+		latencyMs: null,
+		checkedAt: '',
+	});
 
 	// Authentication check
 	useEffect(() => {
@@ -32,6 +47,30 @@ export default function AgentDashboard() {
 		setAgentEmail(email);
 		setAgentRole(role);
 	}, [router]);
+
+	// DB status check — runs once on mount then every 10 seconds
+	const checkDbStatus = async () => {
+		try {
+			const res = await fetch('/api/db-status');
+			if (!res.ok) throw new Error('Failed to reach DB status API');
+			const data: DbStatus = await res.json();
+			setDbStatus(data);
+		} catch {
+			setDbStatus(prev => ({
+				...prev,
+				connected: false,
+				status: 'error',
+				message: 'Could not reach status endpoint.',
+				checkedAt: new Date().toISOString(),
+			}));
+		}
+	};
+
+	useEffect(() => {
+		checkDbStatus();
+		const interval = setInterval(checkDbStatus, 10000);
+		return () => clearInterval(interval);
+	}, []);
 
 	// Fetch sessions list from API
 	const fetchSessions = async (selectFirst = false) => {
@@ -280,7 +319,7 @@ export default function AgentDashboard() {
 						</div>
 
 						{/* Metrics row */}
-						<div className="grid grid-cols-3 gap-2.5">
+						<div className="grid grid-cols-2 gap-2.5">
 							{/* QUEUE CARD */}
 							<div className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-750 p-2.5 rounded-xl text-left shadow-sm">
 								<div className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">
@@ -288,16 +327,6 @@ export default function AgentDashboard() {
 								</div>
 								<div className="text-lg font-black text-slate-800 dark:text-zinc-100 leading-none mt-1">
 									{totalQueueCount}
-								</div>
-							</div>
-
-							{/* AVG WAIT CARD */}
-							<div className="bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-750 p-2.5 rounded-xl text-left shadow-sm">
-								<div className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">
-									AVG WAIT
-								</div>
-								<div className="text-lg font-black text-slate-800 dark:text-zinc-100 leading-none mt-1 truncate">
-									100720m
 								</div>
 							</div>
 
@@ -314,6 +343,72 @@ export default function AgentDashboard() {
 									<span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
 										Online
 									</span>
+								</div>
+							</div>
+
+							{/* DB STATUS CARD — spans full width */}
+							<div
+								title={dbStatus.message}
+								className={`col-span-2 p-2.5 rounded-xl text-left shadow-sm border flex items-center justify-between gap-2 cursor-default transition-colors ${
+									dbStatus.status === 'checking'
+										? 'bg-slate-50 dark:bg-zinc-800 border-slate-100 dark:border-zinc-750'
+										: dbStatus.connected && dbStatus.status === 'ready'
+											? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/50'
+											: dbStatus.connected && dbStatus.status === 'no_tables'
+												? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/50'
+												: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/50'
+								}`}
+							>
+								{/* Left: icon + label */}
+								<div className="flex items-center gap-2">
+									<DatabaseIcon className={`w-3.5 h-3.5 shrink-0 ${
+										dbStatus.status === 'checking'
+											? 'text-slate-400'
+											: dbStatus.connected
+												? dbStatus.status === 'no_tables' ? 'text-amber-500' : 'text-emerald-500'
+												: 'text-red-500'
+									}`} />
+									<div>
+										<div className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">DATABASE</div>
+										<div className={`text-[10px] font-bold mt-0.5 ${
+											dbStatus.status === 'checking'
+												? 'text-slate-500'
+												: dbStatus.connected && dbStatus.status === 'ready'
+													? 'text-emerald-700 dark:text-emerald-400'
+													: dbStatus.connected
+														? 'text-amber-700 dark:text-amber-400'
+														: 'text-red-600 dark:text-red-400'
+										}`}>
+											{dbStatus.status === 'checking' && 'Checking…'}
+											{dbStatus.status === 'ready' && 'Connected & Ready'}
+											{dbStatus.status === 'no_tables' && 'Connected — Tables Missing'}
+											{dbStatus.status === 'misconfigured' && 'Not Configured'}
+											{dbStatus.status === 'error' && 'Disconnected'}
+										</div>
+									</div>
+								</div>
+
+								{/* Right: pulse dot + latency */}
+								<div className="flex flex-col items-end gap-0.5 shrink-0">
+									<span className="relative flex h-2 w-2">
+										{dbStatus.status === 'checking' ? (
+											<span className="relative inline-flex rounded-full h-2 w-2 bg-slate-300 animate-pulse" />
+										) : dbStatus.connected ? (
+											<>
+												<span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+													dbStatus.status === 'no_tables' ? 'bg-amber-400' : 'bg-emerald-400'
+												}`} />
+												<span className={`relative inline-flex rounded-full h-2 w-2 ${
+													dbStatus.status === 'no_tables' ? 'bg-amber-500' : 'bg-emerald-500'
+												}`} />
+											</>
+										) : (
+											<span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+										)}
+									</span>
+									{dbStatus.latencyMs !== null && (
+										<span className="text-[8px] text-slate-400 dark:text-zinc-500 font-mono">{dbStatus.latencyMs}ms</span>
+									)}
 								</div>
 							</div>
 						</div>

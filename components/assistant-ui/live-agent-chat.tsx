@@ -74,7 +74,7 @@ export const LiveAgentChat: FC = () => {
 								Connecting you with a Live Support Expert...
 							</p>
 							<p className="text-[10px] text-amber-600 dark:text-amber-400/80 mt-0.5">
-								An agent will join the chat shortly.
+								An expert will join the chat shortly.
 							</p>
 						</div>
 					</div>
@@ -107,7 +107,7 @@ export const LiveAgentChat: FC = () => {
 						>
 							{!isStudent && (
 								<div className="w-7 h-7 rounded-full bg-rose-100 dark:bg-rose-950 flex items-center justify-center text-rose-700 dark:text-rose-300 text-xs font-bold border border-rose-200/50 shrink-0">
-									AG
+									EX
 								</div>
 							)}
 
@@ -126,7 +126,7 @@ export const LiveAgentChat: FC = () => {
 										isStudent ? 'text-right' : 'text-left'
 									}`}
 								>
-									{isStudent ? 'You' : msg.senderName} • {formatTime(msg.timestamp)}
+									{isStudent ? 'You' : 'Expert'} • {formatTime(msg.timestamp)}
 								</span>
 							</div>
 
@@ -151,8 +151,8 @@ export const LiveAgentChat: FC = () => {
 						type="text"
 						value={inputText}
 						onChange={(e) => setInputText(e.target.value)}
-						placeholder="Reply to support expert..."
-						className="flex-1 bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-full px-4 py-2 text-xs text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-rose-500 dark:focus:border-rose-500/50 transition-colors"
+						placeholder="Reply to the expert..."
+						className="flex-1 bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-full px-4 py-2 text-xs text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#a82229] dark:focus:border-[#a82229]/50 transition-colors"
 					/>
 					<button
 						type="submit"

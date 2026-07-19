@@ -1,5 +1,5 @@
 import { AssistantModalPrimitive } from "@assistant-ui/react";
-import { XIcon, RefreshCwIcon, BellIcon, LogOutIcon, SparklesIcon, HeadphonesIcon } from "lucide-react";
+import { XIcon, RefreshCwIcon, BellIcon, LogOutIcon, SparklesIcon, HeadphonesIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { forwardRef, useEffect, useState } from "react";
 import { Thread } from "@/components/assistant-ui/thread";
 import { useLiveChatStore } from "@/lib/live-chat-store";
@@ -79,6 +79,9 @@ export const AssistantModal = () => {
 		studentName,
 		initSession,
 		loadSessionFromStorage,
+		resumeSession,
+		discardSession,
+		hasExistingSession,
 		sessionId,
 		messages
 	} = useLiveChatStore();
@@ -89,6 +92,7 @@ export const AssistantModal = () => {
 	const [phone, setPhone] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [alertText, setAlertText] = useState("");
+	const [errorText, setErrorText] = useState("");
 
 	// Load session details from storage on mount
 	useEffect(() => {
@@ -112,6 +116,10 @@ export const AssistantModal = () => {
 	const handleClear = () => {
 		if (confirm("Are you sure you want to clear this conversation?")) {
 			sessionStorage.clear();
+			localStorage.removeItem('live_chat_session_id');
+			localStorage.removeItem('live_chat_mode');
+			localStorage.removeItem('scale_uwa_lead_submitted');
+			localStorage.removeItem('live_chat_session_ts');
 			document.cookie = "scale_uwa_user_name=; path=/; max-age=0";
 			window.location.reload();
 		}
@@ -124,20 +132,24 @@ export const AssistantModal = () => {
 
 	const handleLogout = () => {
 		if (confirm("Are you sure you want to sign out and clear your live chat session?")) {
-			sessionStorage.removeItem("live_chat_session_id");
-			sessionStorage.removeItem("live_chat_mode");
-			sessionStorage.removeItem("scale_uwa_lead_submitted");
+			['live_chat_session_id','live_chat_mode','scale_uwa_lead_submitted','live_chat_session_ts']
+				.forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
 			setMode("ai");
 			window.location.reload();
 		}
 	};
 
-	const handleLiveAgentClick = () => {
-		const savedName = sessionStorage.getItem("scale_uwa_user_name") || studentName || "Guest Student";
-		const savedEmail = sessionStorage.getItem("scale_uwa_user_email") || "guest@sonascale.uwa";
-		const savedPhone = sessionStorage.getItem("scale_uwa_user_phone") || "0000000000";
-
-		initSession(savedName, savedEmail, savedPhone);
+	const handleLiveAgentClick = async () => {
+		const savedName  = localStorage.getItem("scale_uwa_user_name")  || sessionStorage.getItem("scale_uwa_user_name")  || studentName || "Guest Student";
+		const savedEmail = localStorage.getItem("scale_uwa_user_email") || sessionStorage.getItem("scale_uwa_user_email") || "guest@sonascale.uwa";
+		const savedPhone = localStorage.getItem("scale_uwa_user_phone") || sessionStorage.getItem("scale_uwa_user_phone") || "0000000000";
+		try {
+			await initSession(savedName, savedEmail, savedPhone);
+		} catch (err: unknown) {
+			const msg = err instanceof Error ? err.message : 'Could not connect. Please try again.';
+			setErrorText(msg);
+			setTimeout(() => setErrorText(''), 6000);
+		}
 	};
 
 	return (
@@ -219,6 +231,43 @@ export const AssistantModal = () => {
 						{alertText && (
 							<div className="text-[9px] text-[#003859] bg-[#e6f4ea] dark:bg-emerald-950/20 px-2 py-1 rounded text-center border border-emerald-100 dark:border-emerald-900/30 animate-in fade-in slide-in-from-top-1">
 								{alertText}
+							</div>
+						)}
+
+						{/* Feature #3: Rate limit / error banner */}
+						{errorText && (
+							<div className="text-[9px] text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 px-2 py-1.5 rounded border border-red-200 dark:border-red-800/40 animate-in fade-in slide-in-from-top-1 leading-relaxed">
+								⚠️ {errorText}
+							</div>
+						)}
+
+						{/* Feature #4: Session Resume Banner */}
+						{hasExistingSession && (
+							<div className="flex items-center justify-between gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-lg px-3 py-2 animate-in fade-in slide-in-from-top-1">
+								<div className="min-w-0">
+									<p className="text-[9px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Previous Session Found</p>
+									<p className="text-[9px] text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed truncate">
+										Resume your live chat with the agent?
+									</p>
+								</div>
+								<div className="flex items-center gap-1.5 shrink-0">
+									<button
+										onClick={() => resumeSession()}
+										className="flex items-center gap-1 px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[9px] font-bold rounded-lg transition-all cursor-pointer"
+										title="Resume previous session"
+									>
+										<RotateCcwIcon className="w-2.5 h-2.5" />
+										Resume
+									</button>
+									<button
+										onClick={() => discardSession()}
+										className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-zinc-700 hover:bg-slate-300 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-[9px] font-bold rounded-lg transition-all cursor-pointer"
+										title="Discard and start fresh"
+									>
+										<Trash2Icon className="w-2.5 h-2.5" />
+										Discard
+									</button>
+								</div>
 							</div>
 						)}
 

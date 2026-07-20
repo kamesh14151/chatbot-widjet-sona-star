@@ -297,14 +297,16 @@ export default function AgentDashboard() {
 							{/* Actions: Admin, Status, Logout */}
 							<div className="flex items-center gap-1.5 shrink-0">
 								<button
+									onClick={() => router.push('/agent/admin')}
 									className="px-2.5 py-1 text-[10px] font-bold text-white bg-[#003859] hover:bg-[#002b45] rounded-lg transition-all cursor-pointer shadow-sm"
 									title="Admin panel"
 								>
 									Admin
 								</button>
 								<button
+									onClick={checkDbStatus}
 									className="px-2.5 py-1 text-[10px] font-bold text-white bg-[#003859] hover:bg-[#002b45] rounded-lg transition-all cursor-pointer shadow-sm"
-									title="System Status"
+									title="Refresh system status"
 								>
 									Status
 								</button>

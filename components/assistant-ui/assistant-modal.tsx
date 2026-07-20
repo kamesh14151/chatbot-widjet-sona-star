@@ -430,7 +430,8 @@ export const AssistantModal = () => {
 										<input
 											type="tel"
 											required
-											placeholder="+91 9876543210"
+											maxLength={13}
+											placeholder="10-digit Mobile Number"
 											value={inputPhone}
 											onChange={(e) => setInputPhone(e.target.value)}
 											className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859]"

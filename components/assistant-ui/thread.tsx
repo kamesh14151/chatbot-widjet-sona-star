@@ -210,7 +210,8 @@ const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onS
 				<input
 					type="tel"
 					required
-					placeholder="Phone Number"
+					maxLength={13}
+					placeholder="10-digit Mobile Number"
 					value={phone}
 					onChange={(e) => setPhone(e.target.value)}
 					className="w-full px-3.5 py-2 text-xs rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-primary/50 transition-all placeholder:text-zinc-400"

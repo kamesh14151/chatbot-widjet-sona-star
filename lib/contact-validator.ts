@@ -1,4 +1,4 @@
-// Utility for strict validation of Name, Email, and Phone numbers
+// Utility for strict validation of Name, Email, and 10-digit Indian Mobile Numbers
 // Prevents disposable emails, fake test domains, dummy numbers (e.g. 9999999999, 1234567890), and invalid formats.
 
 const BANNED_EMAIL_DOMAINS = new Set([
@@ -37,39 +37,39 @@ export function validateEmail(email: string): { valid: boolean; error?: string }
 }
 
 export function validatePhone(phone: string): { valid: boolean; error?: string } {
-	const digits = phone.replace(/[^0-9]/g, '');
+	// Strip all non-digit characters
+	let digits = phone.replace(/[^0-9]/g, '');
 
-	if (digits.length < 10 || digits.length > 15) {
-		return { valid: false, error: 'Phone number must be a valid 10-digit mobile number.' };
+	// Handle +91 or 91 country code prefix or leading 0
+	if (digits.length === 12 && digits.startsWith('91')) {
+		digits = digits.slice(2);
+	} else if (digits.length === 11 && digits.startsWith('0')) {
+		digits = digits.slice(1);
 	}
 
-	// Reject repetitive numbers like 9999999999, 0000000000, 1111111111, 8888888888
+	// Must be EXACTLY 10 digits
+	if (digits.length !== 10) {
+		return { valid: false, error: 'Mobile number must be exactly 10 digits.' };
+	}
+
+	// Indian mobile numbers MUST start with 6, 7, 8, or 9
+	if (!/^[6-9]\d{9}$/.test(digits)) {
+		return { valid: false, error: 'Indian mobile numbers must start with 6, 7, 8, or 9.' };
+	}
+
+	// Reject repetitive numbers like 9999999999, 0000000000, 1111111111, 8888888888, 7777777777
 	if (/^(\d)\1+$/.test(digits)) {
-		return { valid: false, error: 'Please enter a valid, active phone number.' };
+		return { valid: false, error: 'Please enter a valid active 10-digit mobile number.' };
 	}
 
-	// Reject sequential or dummy patterns like 1234567890, 9876543210, 1234512345
-	if (
-		digits.includes('123456789') ||
-		digits.includes('987654321') ||
-		digits.includes('012345678') ||
-		digits.includes('1234512345') ||
-		digits.includes('9999900000') ||
-		digits.includes('0000099999')
-	) {
-		return { valid: false, error: 'Please enter a valid phone number (no dummy series).' };
-	}
-
-	// For Indian phone numbers (10 digits or 12 digits starting with 91)
-	if (digits.length === 10) {
-		if (!/^[6-9]\d{9}$/.test(digits)) {
-			return { valid: false, error: 'Mobile numbers must start with 6, 7, 8, or 9.' };
-		}
-	} else if (digits.length === 12 && digits.startsWith('91')) {
-		const mobilePart = digits.slice(2);
-		if (!/^[6-9]\d{9}$/.test(mobilePart)) {
-			return { valid: false, error: 'Please enter a valid 10-digit mobile number.' };
-		}
+	// Reject sequential or common fake dummy series
+	const DUMMY_SERIES = [
+		'1234567890', '9876543210', '0123456789', '9876500000',
+		'1234512345', '9999900000', '0000099999', '9876598765',
+		'6789067890', '9999999999', '8888888888', '7777777777', '6666666666'
+	];
+	if (DUMMY_SERIES.includes(digits) || digits.includes('123456789') || digits.includes('987654321')) {
+		return { valid: false, error: 'Please enter a genuine 10-digit mobile number.' };
 	}
 
 	return { valid: true };

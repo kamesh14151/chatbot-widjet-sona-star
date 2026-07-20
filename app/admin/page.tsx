@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation';
 export default function AdminRoot() {
 	const router = useRouter();
 	useEffect(() => {
-		// Check if already logged in as admin
 		const isLoggedIn = sessionStorage.getItem('agent_logged_in') === 'true';
 		const role = sessionStorage.getItem('agent_role');
 		if (isLoggedIn && role === 'admin') {
-			router.replace('/agent/dashboard');
+			router.replace('/admin/dashboard');
 		} else {
-			router.replace('/agent/login?role=admin');
+			router.replace('/admin/login');
 		}
 	}, [router]);
 

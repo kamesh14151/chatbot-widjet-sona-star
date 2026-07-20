@@ -1,31 +1,23 @@
 "use client";
 
 import React, { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ArrowRightIcon } from 'lucide-react';
-
-type Role = 'expert' | 'admin';
 
 function LoginForm() {
 	const router = useRouter();
-	const searchParams = useSearchParams();
-
-	// Pre-select role from ?role= query param (e.g. /agent/login?role=admin)
-	const rawRole = searchParams.get('role');
-	const defaultRole: Role = rawRole === 'admin' ? 'admin' : 'expert';
-
-	const [activeTab, setActiveTab] = useState<Role>(defaultRole);
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	const handleTabChange = (role: Role) => {
-		setActiveTab(role);
-		setUsername('');
-		setPassword('');
-		setError('');
-	};
+	// Check if already logged in
+	React.useEffect(() => {
+		const isLoggedIn = sessionStorage.getItem('agent_logged_in') === 'true';
+		const role = sessionStorage.getItem('agent_role');
+		if (isLoggedIn && role === 'expert') router.replace('/agent/dashboard');
+		if (isLoggedIn && role === 'admin') router.replace('/admin/dashboard');
+	}, [router]);
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -36,23 +28,19 @@ function LoginForm() {
 			const res = await fetch('/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password, role: activeTab }),
+				body: JSON.stringify({ username, password, role: 'expert' }),
 			});
-
 			const data = await res.json();
 
 			if (!res.ok) {
-				setError(data.error || 'Login failed. Please try again.');
+				setError(data.error || 'Invalid expert credentials.');
 				setLoading(false);
 				return;
 			}
 
-			// Persist session info
 			sessionStorage.setItem('agent_logged_in', 'true');
 			sessionStorage.setItem('agent_email', data.email);
-			sessionStorage.setItem('agent_role', data.role);
-
-			// Both expert and admin go to the agent dashboard
+			sessionStorage.setItem('agent_role', 'expert');
 			router.push('/agent/dashboard');
 		} catch {
 			setError('Network error. Please try again.');
@@ -60,32 +48,26 @@ function LoginForm() {
 		}
 	};
 
-	const handleMicrosoftLogin = async () => {
+	const handleMicrosoftLogin = () => {
 		setLoading(true);
-		// Simulated — replace with real Microsoft OAuth in production
 		setTimeout(() => {
 			sessionStorage.setItem('agent_logged_in', 'true');
-			sessionStorage.setItem('agent_email', 'microsoft.agent@sona.com');
-			sessionStorage.setItem('agent_role', 'agent');
+			sessionStorage.setItem('agent_email', 'microsoft.expert@sona.com');
+			sessionStorage.setItem('agent_role', 'expert');
 			router.push('/agent/dashboard');
 		}, 1000);
 	};
 
-	const tabs: Role[] = ['expert', 'admin'];
-	const tabLabels: Record<Role, string> = { expert: 'Expert', admin: 'Admin' };
-
 	return (
 		<div className="min-h-screen bg-[#fff7cd] dark:bg-zinc-950 flex flex-col font-sans">
 			<header className="bg-[#fff7cd] dark:bg-zinc-900 px-6 py-4 shrink-0 flex items-center shadow-sm">
-				<h1 className="text-sm font-bold text-slate-800 dark:text-zinc-100 tracking-wide uppercase">
-					SONA SCALE UWA
-				</h1>
+				<h1 className="text-sm font-bold text-slate-800 dark:text-zinc-100 tracking-wide uppercase">SONA SCALE UWA</h1>
 			</header>
 
 			<div className="flex-1 flex items-center justify-center p-4">
 				<div className="w-full max-w-[850px] bg-white dark:bg-zinc-900 rounded-[28px] overflow-hidden shadow-2xl flex flex-col md:flex-row border border-slate-100 dark:border-zinc-800 min-h-[480px]">
 
-					{/* Left Branding Pane */}
+					{/* Left Branding */}
 					<div className="md:w-[45%] bg-gradient-to-br from-[#003859] via-[#004e7c] to-[#005f96] p-8 flex flex-col justify-between text-white relative">
 						<div className="flex items-center gap-2">
 							<div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
@@ -110,43 +92,21 @@ function LoginForm() {
 						</div>
 
 						<div className="space-y-2">
-							<h2 className="text-xl font-bold tracking-wide">Secure Portal Login</h2>
+							<h2 className="text-xl font-bold tracking-wide">Expert Portal</h2>
 							<p className="text-xs text-white/70 leading-relaxed font-light">
-								Use your authorized account to access live student conversations and admin controls.
+								Sign in to access live student conversations and provide real-time support.
 							</p>
 						</div>
 					</div>
 
-					{/* Right Login Form */}
+					{/* Right Form */}
 					<form onSubmit={handleLogin} className="flex-1 p-8 flex flex-col justify-center space-y-5">
 						<div className="space-y-1">
-							<span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">
-								SUPPORT ACCESS
-							</span>
-							<h2 className="text-xl font-extrabold text-slate-800 dark:text-zinc-100 tracking-tight">
-								{tabLabels[activeTab]} Sign In
-							</h2>
+							<span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">EXPERT ACCESS</span>
+							<h2 className="text-xl font-extrabold text-slate-800 dark:text-zinc-100 tracking-tight">Expert Sign In</h2>
 						</div>
 
-						{/* Role Tabs */}
-						<div className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-xl flex gap-1">
-							{tabs.map(role => (
-								<button
-									key={role}
-									type="button"
-									onClick={() => handleTabChange(role)}
-									className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-										activeTab === role
-											? 'bg-[#003859] text-white shadow-sm'
-											: 'text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
-									}`}
-								>
-									{tabLabels[role]}
-								</button>
-							))}
-						</div>
-
-						{/* Microsoft Sign In */}
+						{/* Microsoft SSO */}
 						<button
 							type="button"
 							onClick={handleMicrosoftLogin}
@@ -162,32 +122,29 @@ function LoginForm() {
 							Continue with Microsoft
 						</button>
 
-						{/* Separator */}
 						<div className="relative flex items-center justify-center my-1.5">
 							<div className="absolute inset-0 flex items-center">
 								<div className="w-full border-t border-slate-100 dark:border-zinc-800" />
 							</div>
-							<span className="relative px-3 bg-white dark:bg-zinc-900 text-[9px] text-slate-400 dark:text-zinc-500 uppercase tracking-widest font-semibold">
+							<span className="relative px-3 bg-white dark:bg-zinc-900 text-[9px] text-slate-400 uppercase tracking-widest font-semibold">
 								or continue with username
 							</span>
 						</div>
 
-						{/* Error */}
 						{error && (
 							<div className="text-[10px] text-red-500 font-bold bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-2.5 rounded-xl text-center">
 								{error}
 							</div>
 						)}
 
-						{/* Input Fields — no prefilled values */}
 						<div className="space-y-3">
 							<input
 								type="text"
 								required
 								autoComplete="username"
 								value={username}
-								onChange={(e) => setUsername(e.target.value)}
-								placeholder={`${tabLabels[activeTab]} username`}
+								onChange={e => setUsername(e.target.value)}
+								placeholder="Expert username"
 								className="w-full border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859] transition-all"
 							/>
 							<input
@@ -195,30 +152,28 @@ function LoginForm() {
 								required
 								autoComplete="current-password"
 								value={password}
-								onChange={(e) => setPassword(e.target.value)}
+								onChange={e => setPassword(e.target.value)}
 								placeholder="Password"
 								className="w-full border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859] transition-all"
 							/>
 						</div>
 
-						{/* Submit */}
 						<button
 							type="submit"
 							disabled={loading}
 							className="w-full bg-[#005f96] hover:bg-[#003859] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
 						>
 							{loading ? (
-								<>
-									<span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-									Authenticating...
-								</>
+								<><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Authenticating...</>
 							) : (
-								<>
-									Login as {tabLabels[activeTab]}
-									<ArrowRightIcon className="w-3.5 h-3.5" />
-								</>
+								<>Login as Expert <ArrowRightIcon className="w-3.5 h-3.5" /></>
 							)}
 						</button>
+
+						<p className="text-center text-[10px] text-slate-400 pt-1">
+							Are you an admin?{' '}
+							<a href="/admin/login" className="text-[#003859] font-bold hover:underline cursor-pointer">Admin login →</a>
+						</p>
 					</form>
 				</div>
 			</div>

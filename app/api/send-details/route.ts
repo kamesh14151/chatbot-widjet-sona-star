@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
 			console.error("Failed to fetch geolocation for IP:", ip, e);
 		}
 
-		// 3. Load email config (admin-configurable via dashboard, falls back to env vars)
-		const { readEmailConfig } = await import('@/app/api/admin/email-config/route');
-		const cfg = readEmailConfig();
+		// 3. Load email config (permanently stored in Supabase with local/env fallbacks)
+		const { readEmailConfigAsync } = await import('@/app/api/admin/email-config/route');
+		const cfg = await readEmailConfigAsync();
 
 		const smtpUser = cfg.smtpUser;
 		const smtpPass = cfg.smtpPass;
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 		const fromName = cfg.fromName;
 		const leadEmailTo = cfg.leadEmailTo;
 		const subjectPrefix = cfg.subjectPrefix;
-		const isGmail = smtpHost.includes("gmail");
+		const isGmail = cfg.provider === 'gmail' || smtpHost.includes("gmail");
 
 		let transporter: nodemailer.Transporter;
 

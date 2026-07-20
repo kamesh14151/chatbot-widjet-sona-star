@@ -2,38 +2,36 @@
 
 import React, { useState, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRightIcon, ShieldIcon } from 'lucide-react';
+import { LockIcon, ArrowRightIcon, EyeIcon, EyeOffIcon, ShieldCheckIcon } from 'lucide-react';
 
 function AdminLoginForm() {
 	const router = useRouter();
-	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [showPass, setShowPass] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+
+	React.useEffect(() => {
+		const isLoggedIn = sessionStorage.getItem('agent_logged_in') === 'true';
+		const role = sessionStorage.getItem('agent_role');
+		if (isLoggedIn && role === 'admin') router.replace('/admin/dashboard');
+	}, [router]);
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setLoading(true);
 		setError('');
-
 		try {
 			const res = await fetch('/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password, role: 'admin' }),
+				body: JSON.stringify({ password, role: 'admin' }),
 			});
 			const data = await res.json();
-
-			if (!res.ok) {
-				setError(data.error || 'Invalid admin credentials.');
-				setLoading(false);
-				return;
-			}
-
+			if (!res.ok) { setError(data.error || 'Incorrect password.'); setLoading(false); return; }
 			sessionStorage.setItem('agent_logged_in', 'true');
 			sessionStorage.setItem('agent_email', data.email);
 			sessionStorage.setItem('agent_role', 'admin');
-
 			router.push('/admin/dashboard');
 		} catch {
 			setError('Network error. Please try again.');
@@ -42,96 +40,109 @@ function AdminLoginForm() {
 	};
 
 	return (
-		<div className="min-h-screen bg-[#fff7cd] dark:bg-zinc-950 flex flex-col font-sans">
-			<header className="bg-[#fff7cd] dark:bg-zinc-900 px-6 py-4 flex items-center shadow-sm">
-				<h1 className="text-sm font-bold text-slate-800 dark:text-zinc-100 tracking-wide uppercase">SONA SCALE UWA</h1>
+		<div className="min-h-screen bg-[#0a0a0f] flex flex-col font-sans relative overflow-hidden">
+			{/* Background glow effects */}
+			<div className="absolute inset-0 pointer-events-none">
+				<div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-violet-900/20 blur-[120px]" />
+				<div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#003859]/30 blur-[120px]" />
+				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-indigo-900/10 blur-[80px]" />
+			</div>
+
+			{/* Grid overlay */}
+			<div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize: '40px 40px'}} />
+
+			<header className="relative z-10 px-6 py-5 flex items-center justify-between">
+				<span className="text-[10px] font-bold text-white/30 tracking-widest uppercase">SONA SCALE UWA</span>
+				<a href="/agent/login" className="text-[10px] text-white/30 hover:text-white/60 transition-colors font-medium">
+					Expert Portal →
+				</a>
 			</header>
 
-			<div className="flex-1 flex items-center justify-center p-4">
-				<div className="w-full max-w-[850px] bg-white dark:bg-zinc-900 rounded-[28px] overflow-hidden shadow-2xl flex flex-col md:flex-row border border-slate-100 dark:border-zinc-800 min-h-[420px]">
+			<div className="flex-1 flex items-center justify-center p-4 relative z-10">
+				<div className="w-full max-w-[400px]">
 
-					{/* Left Branding */}
-					<div className="md:w-[45%] bg-gradient-to-br from-[#1a0033] via-[#2d0057] to-[#003859] p-8 flex flex-col justify-between text-white relative">
-						<div className="flex items-center gap-2">
-							<div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-								<ShieldIcon className="w-4 h-4 text-white" />
+					{/* Shield icon with animated ring */}
+					<div className="flex justify-center mb-8">
+						<div className="relative">
+							<div className="absolute inset-0 rounded-full bg-violet-500/20 blur-xl animate-pulse" />
+							<div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-700 to-[#003859] shadow-2xl flex items-center justify-center border border-white/10">
+								<ShieldCheckIcon className="w-9 h-9 text-white" strokeWidth={1.5} />
 							</div>
-							<span className="text-sm font-bold tracking-wide">Admin Portal</span>
-						</div>
-
-						<div className="my-8 flex items-center justify-center">
-							<div className="w-44 h-44 bg-white/5 border border-white/10 rounded-3xl relative flex items-center justify-center overflow-hidden backdrop-blur-sm">
-								<div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
-									<ShieldIcon className="w-8 h-8 text-white/80" />
-								</div>
-								<div className="absolute top-4 right-4 w-12 h-12 rounded-full border border-white/20 flex items-center justify-center">
-									<div className="w-4 h-4 rounded-full bg-violet-400 animate-ping absolute" />
-									<div className="w-4 h-4 rounded-full bg-violet-400" />
-								</div>
-								<div className="absolute -bottom-8 -left-8 w-24 h-24 bg-violet-500/10 rounded-full blur-xl" />
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<h2 className="text-xl font-bold tracking-wide">Admin Access</h2>
-							<p className="text-xs text-white/70 leading-relaxed font-light">
-								Full administrative access: manage sessions, configure email, and view all system stats.
-							</p>
+							{/* Orbit dot */}
+							<div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-violet-400 border-2 border-[#0a0a0f] shadow-lg shadow-violet-500/50" />
 						</div>
 					</div>
 
-					{/* Right Form */}
-					<form onSubmit={handleLogin} className="flex-1 p-8 flex flex-col justify-center space-y-5">
-						<div className="space-y-1">
-							<span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">ADMIN ACCESS</span>
-							<h2 className="text-xl font-extrabold text-slate-800 dark:text-zinc-100 tracking-tight">Administrator Sign In</h2>
+					{/* Heading */}
+					<div className="text-center mb-8">
+						<div className="inline-flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-3 py-1 mb-4">
+							<div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+							<span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Restricted Access</span>
 						</div>
+						<h1 className="text-3xl font-black text-white tracking-tight">Admin Dashboard</h1>
+						<p className="text-sm text-white/40 mt-2 font-light">Enter your admin password to continue</p>
+					</div>
 
-						{/* Error */}
-						{error && (
-							<div className="text-[10px] text-red-500 font-bold bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 p-2.5 rounded-xl text-center">
-								{error}
+					{/* Card */}
+					<div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-7 shadow-2xl space-y-5">
+						<form onSubmit={handleLogin} className="space-y-4">
+							<div>
+								<label className="block text-[10px] font-bold text-white/40 uppercase tracking-wider mb-2">Admin Password</label>
+								<div className="relative">
+									<div className="absolute left-3.5 top-1/2 -translate-y-1/2">
+										<LockIcon className="w-4 h-4 text-white/30" />
+									</div>
+									<input
+										type={showPass ? 'text' : 'password'}
+										required
+										autoComplete="current-password"
+										autoFocus
+										value={password}
+										onChange={e => setPassword(e.target.value)}
+										placeholder="••••••••••••"
+										className="w-full bg-white/5 border border-white/10 rounded-2xl pl-10 pr-10 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-violet-500/60 focus:bg-white/8 transition-all"
+									/>
+									<button
+										type="button"
+										onClick={() => setShowPass(p => !p)}
+										className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 cursor-pointer transition-colors"
+									>
+										{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+									</button>
+								</div>
 							</div>
-						)}
 
-						<div className="space-y-3">
-							<input
-								type="text"
-								required
-								autoComplete="username"
-								value={username}
-								onChange={e => setUsername(e.target.value)}
-								placeholder="Admin username"
-								className="w-full border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859] transition-all"
-							/>
-							<input
-								type="password"
-								required
-								autoComplete="current-password"
-								value={password}
-								onChange={e => setPassword(e.target.value)}
-								placeholder="Password"
-								className="w-full border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/50 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859] transition-all"
-							/>
-						</div>
-
-						<button
-							type="submit"
-							disabled={loading}
-							className="w-full bg-gradient-to-r from-[#2d0057] to-[#003859] hover:from-[#1a0033] hover:to-[#002b45] text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
-						>
-							{loading ? (
-								<><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Authenticating...</>
-							) : (
-								<>Login as Admin <ArrowRightIcon className="w-3.5 h-3.5" /></>
+							{/* Error */}
+							{error && (
+								<div className="text-[11px] text-red-400 font-semibold bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-center">
+									{error}
+								</div>
 							)}
-						</button>
 
-						<p className="text-center text-[10px] text-slate-400">
-							Not an admin?{' '}
-							<a href="/agent/login" className="text-[#003859] font-bold hover:underline cursor-pointer">Expert login →</a>
+							<button
+								type="submit"
+								disabled={loading || !password}
+								className="w-full relative group bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-500 hover:to-purple-600 text-white py-3.5 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-violet-900/50 flex items-center justify-center gap-2 disabled:opacity-40 cursor-pointer active:scale-[0.98]"
+							>
+								{/* Shimmer */}
+								<div className="absolute inset-0 rounded-2xl overflow-hidden">
+									<div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full duration-700" />
+								</div>
+								{loading ? (
+									<span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+								) : (
+									<>Access Dashboard <ArrowRightIcon className="w-4 h-4" /></>
+								)}
+							</button>
+						</form>
+					</div>
+
+					{/* Footer note */}
+					<div className="mt-6 text-center">
+						<p className="text-[10px] text-white/20">
+							This portal is for system administrators only. Unauthorized access is prohibited.
 						</p>
-					</form>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -141,8 +152,8 @@ function AdminLoginForm() {
 export default function AdminLogin() {
 	return (
 		<Suspense fallback={
-			<div className="min-h-screen bg-[#fff7cd] flex items-center justify-center">
-				<div className="w-5 h-5 border-2 border-[#003859] border-t-transparent rounded-full animate-spin" />
+			<div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+				<div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
 			</div>
 		}>
 			<AdminLoginForm />

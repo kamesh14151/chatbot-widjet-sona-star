@@ -101,6 +101,12 @@ const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onS
 	const [phone, setPhone] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+	const formRef = useRef<HTMLFormElement>(null);
+
+	// Auto scroll into view when form appears after 3rd query
+	useEffect(() => {
+		formRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+	}, []);
 
 	// Allow ESC key to skip the form
 	useEffect(() => {
@@ -144,6 +150,7 @@ const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onS
 
 	return (
 		<form
+			ref={formRef}
 			onSubmit={handleSubmit}
 			className="w-full flex flex-col gap-3 p-4 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl shadow-lg animate-in fade-in zoom-in-95 duration-200"
 		>
@@ -226,19 +233,15 @@ export const Thread: FC = () => {
 	const messages = thread.messages;
 	const [hasSubmittedDetails, setHasSubmittedDetails] = useState(false);
 
-	useEffect(() => {
-		const isSubmitted = sessionStorage.getItem("scale_uwa_lead_submitted") === "true";
-		setHasSubmittedDetails(isSubmitted);
-	}, []);
-
-	useEffect(() => {
-		if (messages.length === 0) {
-			setHasSubmittedDetails(false);
-			sessionStorage.removeItem("scale_uwa_lead_submitted");
-		}
-	}, [messages.length]);
-
+	// Reset submitted state when user messages count is below 3 (e.g. fresh or cleared chat)
 	const userMessages = messages.filter((m) => m.role === "user");
+
+	useEffect(() => {
+		if (userMessages.length < 3) {
+			setHasSubmittedDetails(false);
+		}
+	}, [userMessages.length]);
+
 	const shouldShowForm = userMessages.length >= 3 && !hasSubmittedDetails;
 
 	return (

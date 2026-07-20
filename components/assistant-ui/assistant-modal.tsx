@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useState } from "react";
 import { Thread } from "@/components/assistant-ui/thread";
 import { useLiveChatStore } from "@/lib/live-chat-store";
 import { LiveAgentChat } from "@/components/assistant-ui/live-agent-chat";
+import { validateName, validateEmail, validatePhone } from "@/lib/contact-validator";
 
 const ModalButton = forwardRef<
 	HTMLButtonElement,
@@ -152,9 +153,25 @@ export const AssistantModal = () => {
 
 	const handleContactModalSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!inputName.trim() || !inputEmail.trim() || !inputPhone.trim()) {
-			setErrorText("All fields are required.");
-			setTimeout(() => setErrorText(""), 4000);
+
+		const nameVal = validateName(inputName);
+		if (!nameVal.valid) {
+			setErrorText(nameVal.error || "Invalid name.");
+			setTimeout(() => setErrorText(""), 5000);
+			return;
+		}
+
+		const emailVal = validateEmail(inputEmail);
+		if (!emailVal.valid) {
+			setErrorText(emailVal.error || "Invalid email.");
+			setTimeout(() => setErrorText(""), 5000);
+			return;
+		}
+
+		const phoneVal = validatePhone(inputPhone);
+		if (!phoneVal.valid) {
+			setErrorText(phoneVal.error || "Invalid phone number.");
+			setTimeout(() => setErrorText(""), 5000);
 			return;
 		}
 

@@ -40,6 +40,7 @@ import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { validateName, validateEmail, validatePhone } from "@/lib/contact-validator";
 
 const LanguageSelector: FC = () => {
 	const thread = useThread();
@@ -119,10 +120,16 @@ const LeadCaptureForm: FC<{ onSubmit: () => void; onSkip: () => void }> = ({ onS
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!name.trim() || !email.trim() || !phone.trim()) {
-			setError("All fields are required.");
-			return;
-		}
+
+		const nameVal = validateName(name);
+		if (!nameVal.valid) { setError(nameVal.error || "Invalid name."); return; }
+
+		const emailVal = validateEmail(email);
+		if (!emailVal.valid) { setError(emailVal.error || "Invalid email."); return; }
+
+		const phoneVal = validatePhone(phone);
+		if (!phoneVal.valid) { setError(phoneVal.error || "Invalid phone number."); return; }
+
 		setLoading(true);
 		setError("");
 

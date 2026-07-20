@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { validateName, validateEmail, validatePhone } from "@/lib/contact-validator";
 
 export async function POST(req: NextRequest) {
 	try {
@@ -10,6 +11,21 @@ export async function POST(req: NextRequest) {
 				{ error: "Name, email, and phone are required." },
 				{ status: 400 }
 			);
+		}
+
+		const nameVal = validateName(name);
+		if (!nameVal.valid) {
+			return NextResponse.json({ error: nameVal.error }, { status: 400 });
+		}
+
+		const emailVal = validateEmail(email);
+		if (!emailVal.valid) {
+			return NextResponse.json({ error: emailVal.error }, { status: 400 });
+		}
+
+		const phoneVal = validatePhone(phone);
+		if (!phoneVal.valid) {
+			return NextResponse.json({ error: phoneVal.error }, { status: 400 });
 		}
 
 		// 1. Get Client IP Address

@@ -42,8 +42,8 @@ export default function AgentDashboard() {
 			return;
 		}
 
-		const email = sessionStorage.getItem('agent_email') || 'agent@sona.com';
-		const role = sessionStorage.getItem('agent_role') || 'agent';
+		const email = sessionStorage.getItem('agent_email') || 'expert@sona.com';
+		const role = sessionStorage.getItem('agent_role') || 'expert';
 		setAgentEmail(email);
 		setAgentRole(role);
 	}, [router]);

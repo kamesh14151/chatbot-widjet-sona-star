@@ -44,13 +44,18 @@ export async function POST(req: NextRequest) {
 			console.error("Failed to fetch geolocation for IP:", ip, e);
 		}
 
-		// 3. Configure Transporter
-		// Supports GMAIL_USER/GMAIL_PASS or SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS
-		const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER || "";
-		const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_PASS || "";
-		const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-		const smtpPort = Number(process.env.SMTP_PORT || "465");
-		const isGmail = smtpHost.includes("gmail") || !!process.env.GMAIL_USER;
+		// 3. Load email config (admin-configurable via dashboard, falls back to env vars)
+		const { readEmailConfig } = await import('@/app/api/admin/email-config/route');
+		const cfg = readEmailConfig();
+
+		const smtpUser = cfg.smtpUser;
+		const smtpPass = cfg.smtpPass;
+		const smtpHost = cfg.smtpHost;
+		const smtpPort = Number(cfg.smtpPort || 465);
+		const fromName = cfg.fromName;
+		const leadEmailTo = cfg.leadEmailTo;
+		const subjectPrefix = cfg.subjectPrefix;
+		const isGmail = smtpHost.includes("gmail");
 
 		let transporter: nodemailer.Transporter;
 
@@ -58,28 +63,21 @@ export async function POST(req: NextRequest) {
 			if (isGmail) {
 				transporter = nodemailer.createTransport({
 					service: "gmail",
-					auth: {
-						user: smtpUser,
-						pass: smtpPass,
-					},
+					auth: { user: smtpUser, pass: smtpPass },
 				});
 			} else {
 				transporter = nodemailer.createTransport({
 					host: smtpHost,
 					port: smtpPort,
 					secure: smtpPort === 465,
-					auth: {
-						user: smtpUser,
-						pass: smtpPass,
-					},
+					auth: { user: smtpUser, pass: smtpPass },
 				});
 			}
 
-			// Send mail
 			await transporter.sendMail({
-				from: `"SCALE UWA Assistant" <${smtpUser}>`,
-				to: "kamesh6592@gmail.com",
-				subject: `New User Lead: ${name}`,
+				from: `"${fromName}" <${smtpUser}>`,
+				to: leadEmailTo,
+				subject: `${subjectPrefix}: ${name}`,
 				html: `
 					<h2>New Lead captured in SCALE UWA Chatbot</h2>
 					<p><strong>Name:</strong> ${name}</p>
@@ -91,17 +89,13 @@ export async function POST(req: NextRequest) {
 				`,
 			});
 
-			console.log(`Email successfully sent to kamesh6592@gmail.com for lead: ${name}`);
+			console.log(`Email sent to ${leadEmailTo} for lead: ${name}`);
 		} else {
-			// Fallback: log to console if no SMTP credentials are set
 			console.log("-----------------------------------------");
-			console.log("Lead Details Captured (No SMTP credentials configured):");
-			console.log(`Name: ${name}`);
-			console.log(`Email: ${email}`);
-			console.log(`Phone: ${phone}`);
-			console.log(`IP: ${ip}`);
-			console.log(`Location: ${locationInfo}`);
-			console.log("Please set GMAIL_USER and GMAIL_PASS in .env.local to send actual emails.");
+			console.log("Lead captured (No SMTP credentials configured):");
+			console.log(`Name: ${name}, Email: ${email}, Phone: ${phone}`);
+			console.log(`IP: ${ip}, Location: ${locationInfo}`);
+			console.log("Configure email in Admin Panel → Email Settings.");
 			console.log("-----------------------------------------");
 		}
 

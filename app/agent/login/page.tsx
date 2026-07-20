@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRightIcon } from 'lucide-react';
 
 type Role = 'expert' | 'admin';
 
-export default function AgentLogin() {
+function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -223,5 +223,17 @@ export default function AgentLogin() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function AgentLogin() {
+	return (
+		<Suspense fallback={
+			<div className="min-h-screen bg-[#fff7cd] flex items-center justify-center">
+				<div className="w-5 h-5 border-2 border-[#003859] border-t-transparent rounded-full animate-spin" />
+			</div>
+		}>
+			<LoginForm />
+		</Suspense>
 	);
 }

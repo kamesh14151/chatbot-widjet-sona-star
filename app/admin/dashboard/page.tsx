@@ -32,6 +32,7 @@ interface DbStatus {
 }
 
 interface EmailConfig {
+	provider: 'gmail' | 'smtp';
 	smtpHost: string;
 	smtpPort: string;
 	smtpUser: string;
@@ -58,6 +59,7 @@ export default function AdminPanel() {
 
 	// ── Email config state ───────────────────────────────────────
 	const [emailConfig, setEmailConfig] = useState<EmailConfig>({
+		provider: 'gmail',
 		smtpHost: 'smtp.gmail.com',
 		smtpPort: '465',
 		smtpUser: '',
@@ -423,12 +425,45 @@ export default function AdminPanel() {
 				{/* ── EMAIL SETTINGS TAB ── */}
 				{activeTab === 'email' && (
 					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden">
-						<div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
-							<h2 className="text-sm font-black text-slate-800 dark:text-zinc-100">Email Settings</h2>
-							<p className="text-[10px] text-slate-400 mt-0.5">Configure the sender account and recipient for lead notification emails.</p>
+						<div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+							<div>
+								<h2 className="text-sm font-black text-slate-800 dark:text-zinc-100">Email Settings</h2>
+								<p className="text-[10px] text-slate-400 mt-0.5">Configure lead notifications via Gmail or Custom SMTP server.</p>
+							</div>
 						</div>
 
 						<div className="p-6 space-y-6">
+							{/* Provider Choice */}
+							<div>
+								<label className={labelCls}>Email Service Type</label>
+								<div className="flex gap-2 p-1 bg-slate-100 dark:bg-zinc-800 rounded-xl w-fit">
+									<button
+										type="button"
+										onClick={() => setEmailConfig(p => ({ ...p, provider: 'gmail', smtpHost: 'smtp.gmail.com', smtpPort: '465' }))}
+										className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+											(emailConfig.provider === 'gmail' || !emailConfig.provider)
+												? 'bg-[#003859] text-white shadow-sm'
+												: 'text-slate-600 dark:text-zinc-400 hover:text-slate-800'
+										}`}
+									>
+										Gmail (App Password)
+									</button>
+									<button
+										type="button"
+										onClick={() => setEmailConfig(p => ({ ...p, provider: 'smtp' }))}
+										className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+											emailConfig.provider === 'smtp'
+												? 'bg-[#003859] text-white shadow-sm'
+												: 'text-slate-600 dark:text-zinc-400 hover:text-slate-800'
+										}`}
+									>
+										Custom SMTP Server
+									</button>
+								</div>
+							</div>
+
+							<hr className="border-slate-100 dark:border-zinc-800" />
+
 							{/* Recipient */}
 							<div>
 								<h3 className="text-xs font-black text-slate-700 dark:text-zinc-200 mb-4 flex items-center gap-2">
@@ -445,7 +480,7 @@ export default function AdminPanel() {
 											placeholder="admin@yourdomain.com"
 											className={inputCls}
 										/>
-										<p className="text-[9px] text-slate-400 mt-1">New lead notifications are sent to this address.</p>
+										<p className="text-[9px] text-slate-400 mt-1">New lead notifications will be sent to this email address.</p>
 									</div>
 									<div>
 										<label className={labelCls}>Email Subject Prefix</label>
@@ -456,88 +491,147 @@ export default function AdminPanel() {
 											placeholder="New User Lead"
 											className={inputCls}
 										/>
-										<p className="text-[9px] text-slate-400 mt-1">E.g. "New User Lead" → subject: "New User Lead: John"</p>
+										<p className="text-[9px] text-slate-400 mt-1">E.g. "New User Lead" → Subject: "New User Lead: John Doe"</p>
 									</div>
 								</div>
 							</div>
 
 							<hr className="border-slate-100 dark:border-zinc-800" />
 
-							{/* Sender */}
+							{/* Sender Settings according to provider */}
 							<div>
 								<h3 className="text-xs font-black text-slate-700 dark:text-zinc-200 mb-4 flex items-center gap-2">
 									<span className="w-5 h-5 rounded-full bg-[#003859] text-white flex items-center justify-center text-[9px] font-black">2</span>
-									Sender / SMTP Settings
+									{emailConfig.provider === 'smtp' ? 'Custom SMTP Credentials' : 'Gmail Sender Credentials'}
 								</h3>
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div>
-										<label className={labelCls}>SMTP Host</label>
-										<input
-											type="text"
-											value={emailConfig.smtpHost}
-											onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))}
-											placeholder="smtp.gmail.com"
-											className={inputCls}
-										/>
-									</div>
-									<div>
-										<label className={labelCls}>SMTP Port</label>
-										<input
-											type="text"
-											value={emailConfig.smtpPort}
-											onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))}
-											placeholder="465"
-											className={inputCls}
-										/>
-									</div>
-									<div>
-										<label className={labelCls}>Sender Email (SMTP Username)</label>
-										<input
-											type="email"
-											value={emailConfig.smtpUser}
-											onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
-											placeholder="yourname@gmail.com"
-											className={inputCls}
-										/>
-									</div>
-									<div>
-										<label className={labelCls}>App Password (SMTP Password)</label>
-										<div className="relative">
-											<input
-												type={showPass ? 'text' : 'password'}
-												value={emailConfig.smtpPass}
-												onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
-												placeholder="Gmail App Password or SMTP pass"
-												className={`${inputCls} pr-10`}
-											/>
-											<button
-												type="button"
-												onClick={() => setShowPass(p => !p)}
-												className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-											>
-												{showPass ? <EyeOffIcon className="w-3.5 h-3.5" /> : <EyeIcon className="w-3.5 h-3.5" />}
-											</button>
-										</div>
-										<p className="text-[9px] text-slate-400 mt-1">For Gmail: use a 16-char App Password (not your account password).</p>
-									</div>
-									<div className="md:col-span-2">
-										<label className={labelCls}>From Display Name</label>
-										<input
-											type="text"
-											value={emailConfig.fromName}
-											onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
-											placeholder="SCALE UWA Assistant"
-											className={inputCls}
-										/>
-									</div>
-								</div>
 
-								{/* Gmail tip */}
-								<div className="mt-4 p-3.5 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
-									<p className="text-[10px] text-blue-700 dark:text-blue-300 font-medium leading-relaxed">
-										<strong>Gmail tip:</strong> Go to <strong>Google Account → Security → 2-Step Verification → App Passwords</strong> to generate a 16-character app password. Use that as the password here.
-									</p>
-								</div>
+								{emailConfig.provider === 'gmail' || !emailConfig.provider ? (
+									/* Gmail Configuration */
+									<div className="space-y-4">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div>
+												<label className={labelCls}>Gmail Address (Sender)</label>
+												<input
+													type="email"
+													value={emailConfig.smtpUser}
+													onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
+													placeholder="yourname@gmail.com"
+													className={inputCls}
+												/>
+											</div>
+											<div>
+												<label className={labelCls}>Gmail App Password</label>
+												<div className="relative">
+													<input
+														type={showPass ? 'text' : 'password'}
+														value={emailConfig.smtpPass}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
+														placeholder="16-character App Password"
+														className={`${inputCls} pr-10 font-mono`}
+													/>
+													<button
+														type="button"
+														onClick={() => setShowPass(p => !p)}
+														className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+														title={showPass ? "Hide password" : "Show password"}
+													>
+														{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+													</button>
+												</div>
+												<p className="text-[9px] text-slate-400 mt-1">
+													Click the eye icon to view or verify your 16-character App Password.
+												</p>
+											</div>
+											<div className="md:col-span-2">
+												<label className={labelCls}>From Display Name</label>
+												<input
+													type="text"
+													value={emailConfig.fromName}
+													onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
+													placeholder="SCALE UWA Assistant"
+													className={inputCls}
+												/>
+											</div>
+										</div>
+
+										{/* Gmail instructions tip */}
+										<div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
+											<h4 className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">How to generate a Gmail App Password:</h4>
+											<ol className="text-[10px] text-blue-700 dark:text-blue-300/80 list-decimal list-inside space-y-1 leading-relaxed">
+												<li>Go to your <strong>Google Account</strong> settings (myaccount.google.com).</li>
+												<li>Select <strong>Security</strong> and ensure <strong>2-Step Verification</strong> is enabled.</li>
+												<li>Search for <strong>App Passwords</strong> and create a new key named "Chatbot".</li>
+												<li>Copy the generated 16-character password and paste it into the field above.</li>
+											</ol>
+										</div>
+									</div>
+								) : (
+									/* Custom SMTP Configuration */
+									<div className="space-y-4">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+											<div>
+												<label className={labelCls}>SMTP Host</label>
+												<input
+													type="text"
+													value={emailConfig.smtpHost}
+													onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))}
+													placeholder="smtp.example.com"
+													className={inputCls}
+												/>
+											</div>
+											<div>
+												<label className={labelCls}>SMTP Port</label>
+												<input
+													type="text"
+													value={emailConfig.smtpPort}
+													onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))}
+													placeholder="587 or 465"
+													className={inputCls}
+												/>
+											</div>
+											<div>
+												<label className={labelCls}>SMTP Username / Email</label>
+												<input
+													type="text"
+													value={emailConfig.smtpUser}
+													onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
+													placeholder="user@example.com"
+													className={inputCls}
+												/>
+											</div>
+											<div>
+												<label className={labelCls}>SMTP Password</label>
+												<div className="relative">
+													<input
+														type={showPass ? 'text' : 'password'}
+														value={emailConfig.smtpPass}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
+														placeholder="SMTP password"
+														className={`${inputCls} pr-10`}
+													/>
+													<button
+														type="button"
+														onClick={() => setShowPass(p => !p)}
+														className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+														title={showPass ? "Hide password" : "Show password"}
+													>
+														{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+													</button>
+												</div>
+											</div>
+											<div className="md:col-span-2">
+												<label className={labelCls}>From Display Name</label>
+												<input
+													type="text"
+													value={emailConfig.fromName}
+													onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
+													placeholder="SCALE UWA Assistant"
+													className={inputCls}
+												/>
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
 
 							{/* Action Buttons */}

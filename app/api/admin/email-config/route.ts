@@ -7,7 +7,7 @@ import path from 'path';
 const CONFIG_FILE = path.join(process.cwd(), 'email-config.json');
 
 export interface EmailConfig {
-	// Sender (outgoing SMTP)
+	provider: 'gmail' | 'smtp';
 	smtpHost: string;
 	smtpPort: string;
 	smtpUser: string;   // Gmail address or SMTP username
@@ -20,6 +20,7 @@ export interface EmailConfig {
 }
 
 const DEFAULT_CONFIG: EmailConfig = {
+	provider:      (process.env.SMTP_HOST && !process.env.SMTP_HOST.includes('gmail')) ? 'smtp' : 'gmail',
 	smtpHost:      process.env.SMTP_HOST      || 'smtp.gmail.com',
 	smtpPort:      process.env.SMTP_PORT      || '465',
 	smtpUser:      process.env.SMTP_USER      || process.env.GMAIL_USER || '',
@@ -45,10 +46,7 @@ export function readEmailConfig(): EmailConfig {
 
 function writeEmailConfig(config: EmailConfig): void {
 	try {
-		// Never persist the password to file if it's blank (keep env var)
-		const toSave: Partial<EmailConfig> = { ...config };
-		if (!toSave.smtpPass) delete toSave.smtpPass;
-		fs.writeFileSync(CONFIG_FILE, JSON.stringify(toSave, null, 2), 'utf-8');
+		fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
 	} catch (e) {
 		console.error('Error writing email config file:', e);
 	}
@@ -56,11 +54,7 @@ function writeEmailConfig(config: EmailConfig): void {
 
 export async function GET() {
 	const config = readEmailConfig();
-	// Mask password before sending to client
-	return NextResponse.json({
-		...config,
-		smtpPass: config.smtpPass ? '••••••••' : '',
-	});
+	return NextResponse.json(config);
 }
 
 export async function POST(request: Request) {
@@ -69,13 +63,11 @@ export async function POST(request: Request) {
 
 		const current = readEmailConfig();
 		const updated: EmailConfig = {
+			provider:      body.provider      ?? current.provider ?? 'gmail',
 			smtpHost:      body.smtpHost      ?? current.smtpHost,
 			smtpPort:      body.smtpPort      ?? current.smtpPort,
 			smtpUser:      body.smtpUser      ?? current.smtpUser,
-			// Only update password if a real value (not the masked placeholder) is sent
-			smtpPass:      (body.smtpPass && body.smtpPass !== '••••••••')
-				? body.smtpPass
-				: current.smtpPass,
+			smtpPass:      body.smtpPass      ?? current.smtpPass,
 			fromName:      body.fromName      ?? current.fromName,
 			leadEmailTo:   body.leadEmailTo   ?? current.leadEmailTo,
 			subjectPrefix: body.subjectPrefix ?? current.subjectPrefix,
@@ -89,3 +81,4 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: 'Failed to save config' }, { status: 500 });
 	}
 }
+

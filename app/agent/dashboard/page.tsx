@@ -107,7 +107,12 @@ export default function AgentDashboard() {
 
 		try {
 			const res = await fetch(`/api/live-agent/messages?sessionId=${selectedSessionId}`);
-			if (!res.ok) throw new Error("Failed to fetch session messages");
+			if (!res.ok) {
+				if (res.status === 404) {
+					setActiveSession(null);
+				}
+				return;
+			}
 			const data = await res.json();
 
 			// Find session details in general list to get metadata
@@ -186,7 +191,11 @@ export default function AgentDashboard() {
 				})
 			});
 
-			if (!res.ok) throw new Error("Failed to send message");
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				console.warn("Failed to send message:", err.error || res.statusText);
+				return;
+			}
 			await fetchActiveSessionDetail();
 		} catch (error) {
 			console.error("Error sending reply:", error);
@@ -208,7 +217,11 @@ export default function AgentDashboard() {
 				})
 			});
 
-			if (!res.ok) throw new Error("Failed to assign agent");
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				console.warn("Failed to assign agent:", err.error || res.statusText);
+				return;
+			}
 			fetchSessions();
 		} catch (error) {
 			console.error("Error assigning chat:", error);

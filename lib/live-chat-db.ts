@@ -168,8 +168,10 @@ export class LiveChatDb {
 	}
 
 	static async addMessage(sessionId: string, sender: 'student' | 'agent' | 'system' | 'ai', senderName: string, text: string): Promise<ChatMessage | null> {
-		const session = await this.getSession(sessionId);
-		if (!session) return null;
+		let session = await this.getSession(sessionId);
+		if (!session) {
+			session = await this.createSession(sessionId, senderName || 'Student', 'guest@sonascale.uwa', '0000000000');
+		}
 
 		const now = Date.now();
 		const message: ChatMessage = {
@@ -209,8 +211,10 @@ export class LiveChatDb {
 	}
 
 	static async assignAgent(sessionId: string, agentEmail: string): Promise<boolean> {
-		const session = await this.getSession(sessionId);
-		if (!session) return false;
+		let session = await this.getSession(sessionId);
+		if (!session) {
+			session = await this.createSession(sessionId, 'Student', 'guest@sonascale.uwa', '0000000000');
+		}
 
 		const now = Date.now();
 		session.assignedAgent = agentEmail;

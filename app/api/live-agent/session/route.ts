@@ -20,6 +20,10 @@ function getClientIp(req: NextRequest): string {
 }
 
 function isRateLimited(ip: string): boolean {
+	if (process.env.NODE_ENV === 'development' || ip === '127.0.0.1' || ip === '::1' || ip === 'unknown' || ip === 'localhost') {
+		return false;
+	}
+
 	const now    = Date.now();
 	const record = rateMap.get(ip);
 

@@ -305,7 +305,7 @@ export default function AdminPanel() {
 					<div className="flex items-center gap-3">
 						<DatabaseIcon className={`w-5 h-5 ${dbStatus.status === 'checking' ? 'text-slate-400' : dbStatus.connected ? 'text-emerald-600' : 'text-red-500'}`} />
 						<div>
-							<p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Supabase Database</p>
+							<p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">MongoDB Database</p>
 							<p className={`text-xs font-bold mt-0.5 ${dbStatus.status === 'checking' ? 'text-slate-500' : dbStatus.connected ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
 								{dbStatus.status === 'checking' && 'Checking…'}
 								{dbStatus.status === 'ready' && 'Connected & Ready'}

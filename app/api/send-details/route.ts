@@ -5,7 +5,7 @@ import { validateName, validateEmail, validatePhone } from "@/lib/contact-valida
 export async function POST(req: NextRequest) {
 	try {
 		const { name, email, phone } = await req.json();
-
+		console.log("Received lead details:", { name, email, phone });
 		if (!name || !email || !phone) {
 			return NextResponse.json(
 				{ error: "Name, email, and phone are required." },
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 			console.error("Failed to fetch geolocation for IP:", ip, e);
 		}
 
-		// 3. Load email config (permanently stored in Supabase with local/env fallbacks)
+		// 3. Load email config (permanently stored in MongoDB with local/env fallbacks)
 		const { readEmailConfigAsync } = await import('@/app/api/admin/email-config/route');
 		const cfg = await readEmailConfigAsync();
 

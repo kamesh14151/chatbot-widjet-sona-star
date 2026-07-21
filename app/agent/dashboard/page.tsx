@@ -140,7 +140,7 @@ export default function AgentDashboard() {
 	// Fetch messages of selected session on active session change
 	useEffect(() => {
 		fetchActiveSessionDetail();
-	}, [selectedSessionId, sessions]);
+	}, [selectedSessionId]);
 
 	// Poll active session details every 1 second for real-time messaging
 	useEffect(() => {
@@ -151,10 +151,15 @@ export default function AgentDashboard() {
 		return () => clearInterval(interval);
 	}, [selectedSessionId]);
 
-	// Scroll to bottom of conversation window
+	// Scroll to bottom of conversation window ONLY when new messages arrive
+	const prevMsgLengthRef = useRef(0);
 	useEffect(() => {
-		messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-	}, [activeSession?.messages]);
+		const currentLength = activeSession?.messages?.length || 0;
+		if (currentLength > prevMsgLengthRef.current) {
+			messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+		}
+		prevMsgLengthRef.current = currentLength;
+	}, [activeSession?.messages?.length]);
 
 	const handleSendReply = async (e: React.FormEvent) => {
 		e.preventDefault();

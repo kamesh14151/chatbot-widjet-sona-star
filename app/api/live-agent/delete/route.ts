@@ -1,52 +1,28 @@
-import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import { LiveChatDb } from '@/lib/live-chat-db';
 
-const DB_FILE = path.join(process.cwd(), 'live-chats.json');
-
-export async function DELETE(request: Request) {
+export async function DELETE(req: NextRequest) {
 	try {
-		const body = await request.json();
-		const { sessionIds } = body;
+		const { sessionIds } = await req.json();
 
-		if (!sessionIds || !Array.isArray(sessionIds) || sessionIds.length === 0) {
-			return NextResponse.json({ error: 'Missing or invalid sessionIds array' }, { status: 400 });
+		if (!Array.isArray(sessionIds) || sessionIds.length === 0) {
+			return NextResponse.json(
+				{ error: 'sessionIds array is required' },
+				{ status: 400 }
+			);
 		}
 
-		const isSupabaseEnabled =
-			!!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+		const deletedCount = await LiveChatDb.deleteSessions(sessionIds);
 
-		if (isSupabaseEnabled) {
-			const { error } = await supabase
-				.from('chat_sessions')
-				.delete()
-				.in('id', sessionIds);
-
-			if (error) {
-				console.error('Error deleting sessions from Supabase:', error);
-				return NextResponse.json({ error: 'Failed to delete sessions' }, { status: 500 });
-			}
-		} else {
-			// Local file fallback
-			try {
-				if (fs.existsSync(DB_FILE)) {
-					const data = fs.readFileSync(DB_FILE, 'utf-8');
-					const sessions = JSON.parse(data);
-					for (const id of sessionIds) {
-						delete sessions[id];
-					}
-					fs.writeFileSync(DB_FILE, JSON.stringify(sessions, null, 2), 'utf-8');
-				}
-			} catch (err) {
-				console.error('Error deleting from local file:', err);
-				return NextResponse.json({ error: 'Failed to delete sessions from local store' }, { status: 500 });
-			}
-		}
-
-		return NextResponse.json({ success: true, deleted: sessionIds.length });
-	} catch (error) {
-		console.error('Error in delete sessions API route:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+		return NextResponse.json({
+			success: true,
+			deleted: deletedCount,
+		});
+	} catch (error: any) {
+		console.error('Error in DELETE session endpoint:', error);
+		return NextResponse.json(
+			{ error: error.message || 'Failed to delete sessions' },
+			{ status: 500 }
+		);
 	}
 }

@@ -152,6 +152,7 @@ export const AssistantModal = () => {
 	};
 
 	const handleContactModalSubmit = async (e: React.FormEvent) => {
+		console.log(("vino"))
 		e.preventDefault();
 
 		const nameVal = validateName(inputName);
@@ -176,7 +177,8 @@ export const AssistantModal = () => {
 		}
 
 		setSubmittingModal(true);
-		try {
+		try {	
+			console.log("Submitting contact details:", { name: inputName, email: inputEmail, phone: inputPhone });
 			// 1. Post lead details to admin notification API
 			await fetch("/api/send-details", {
 				method: "POST",

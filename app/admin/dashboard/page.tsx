@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-	ArrowLeftIcon,
 	DownloadIcon,
 	Trash2Icon,
 	RefreshCwIcon,
@@ -20,6 +19,8 @@ import {
 	SendIcon,
 	EyeIcon,
 	EyeOffIcon,
+	PowerIcon,
+	SearchIcon,
 } from 'lucide-react';
 import { ChatSession } from '@/lib/live-chat-db';
 
@@ -201,7 +202,7 @@ export default function AdminPanel() {
 			const res = await fetch('/api/send-details', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: 'Test Lead', email: emailConfig.smtpUser || 'test@test.com', phone: '+0000000000' }),
+				body: JSON.stringify({ name: 'System Admin', email: emailConfig.smtpUser, phone: '+919988776655' }),
 			});
 			if (!res.ok) throw new Error();
 			showToast('success', `Test email sent to ${emailConfig.leadEmailTo}`);
@@ -214,20 +215,20 @@ export default function AdminPanel() {
 
 	const formatDate = (ts: number) => new Date(ts).toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 	const statusColors: Record<string, string> = {
-		waiting: 'bg-amber-100 text-amber-800 border border-amber-200/60',
-		active: 'bg-emerald-100 text-emerald-800 border border-emerald-200/60',
-		resolved: 'bg-slate-100 text-slate-600 border border-slate-200/60',
+		waiting: 'bg-amber-100/80 text-amber-800 border border-amber-200/60 dark:bg-amber-900/30 dark:text-amber-400',
+		active: 'bg-emerald-100/80 text-emerald-800 border border-emerald-200/60 dark:bg-emerald-900/30 dark:text-emerald-400',
+		resolved: 'bg-slate-100 text-slate-600 border border-slate-200/60 dark:bg-zinc-800 dark:text-zinc-400',
 	};
 
-	const inputCls = "w-full border border-slate-200 dark:border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-zinc-800 text-slate-800 dark:text-zinc-100 focus:outline-none focus:border-[#003859] transition-all";
-	const labelCls = "block text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5";
+	const inputCls = "w-full bg-white/60 dark:bg-zinc-900/60 backdrop-blur-sm border border-slate-200/60 dark:border-zinc-700/60 rounded-xl px-4 py-3 text-[13px] text-slate-800 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#003859]/20 focus:border-[#003859] transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.01)]";
+	const labelCls = "block text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2 ml-1";
 
 	return (
-		<div className="min-h-screen bg-[#edf3f6] dark:bg-zinc-950 font-sans text-slate-800 dark:text-zinc-100 flex flex-col">
+		<div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 dark:from-zinc-950 dark:to-zinc-900 font-sans text-slate-800 dark:text-zinc-100 flex flex-col">
 
 			{/* Toast */}
 			{toast && (
-				<div className={`fixed top-5 right-5 z-50 px-5 py-3 rounded-2xl shadow-2xl text-sm font-bold flex items-center gap-2 animate-in slide-in-from-top-2 duration-200 ${toast.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'}`}>
+				<div className={`fixed top-5 right-5 z-50 px-5 py-3.5 rounded-2xl shadow-xl backdrop-blur-md text-sm font-bold flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 ${toast.type === 'success' ? 'bg-emerald-600/90 text-white' : 'bg-rose-600/90 text-white'}`}>
 					{toast.type === 'success' ? <CheckCircleIcon className="w-4 h-4 shrink-0" /> : <AlertCircleIcon className="w-4 h-4 shrink-0" />}
 					{toast.message}
 				</div>
@@ -235,17 +236,17 @@ export default function AdminPanel() {
 
 			{/* Delete Modal */}
 			{deleteConfirm && (
-				<div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-slate-100 dark:border-zinc-800">
-						<div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-							<Trash2Icon className="w-5 h-5 text-red-600" />
+				<div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+					<div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-sm w-full border border-white/20 dark:border-zinc-700/50 scale-in-center">
+						<div className="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mx-auto mb-5 border border-rose-200/50">
+							<Trash2Icon className="w-6 h-6 text-rose-600 dark:text-rose-400" />
 						</div>
-						<h3 className="text-base font-black text-center">Delete {selectedIds.size} session{selectedIds.size !== 1 ? 's' : ''}?</h3>
-						<p className="text-xs text-center text-slate-500 mt-2 mb-5 leading-relaxed">This action is permanent and cannot be undone.</p>
-						<div className="flex gap-2">
-							<button onClick={() => setDeleteConfirm(false)} className="flex-1 py-2 text-xs font-bold border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">Cancel</button>
-							<button onClick={handleDelete} disabled={deleting} className="flex-1 py-2 text-xs font-bold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1">
-								{deleting ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Trash2Icon className="w-3.5 h-3.5" /> Delete</>}
+						<h3 className="text-lg font-black text-center text-slate-800 dark:text-zinc-100">Delete {selectedIds.size} session{selectedIds.size !== 1 ? 's' : ''}?</h3>
+						<p className="text-[13px] text-center text-slate-500 dark:text-zinc-400 mt-2 mb-6 leading-relaxed">This action is permanent and cannot be undone.</p>
+						<div className="flex gap-3">
+							<button onClick={() => setDeleteConfirm(false)} className="flex-1 py-3 text-xs font-bold border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all cursor-pointer">Cancel</button>
+							<button onClick={handleDelete} disabled={deleting} className="flex-1 py-3 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all cursor-pointer shadow-md shadow-rose-600/20 disabled:opacity-50 flex items-center justify-center gap-2">
+								{deleting ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><Trash2Icon className="w-4 h-4" /> Delete</>}
 							</button>
 						</div>
 					</div>
@@ -253,165 +254,187 @@ export default function AdminPanel() {
 			)}
 
 			{/* Header */}
-			<header className="bg-[#fff7cd] dark:bg-zinc-900 border-b border-[#ebd7a3] dark:border-zinc-800 px-6 py-4 flex items-center gap-4 shrink-0">
-				<div>
-					<h1 className="text-sm font-bold tracking-wide uppercase">SONA SCALE UWA — Admin Dashboard</h1>
-					<p className="text-[10px] text-slate-400 mt-0.5">Session management, email settings & system stats</p>
+			<header className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl border-b border-white/40 dark:border-zinc-800/50 px-8 py-5 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+				<div className="flex items-center gap-4">
+					<div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#003859] to-sky-600 text-white flex items-center justify-center shadow-lg shadow-[#003859]/20 border border-white/20">
+						<ShieldIcon className="w-5 h-5" />
+					</div>
+					<div>
+						<h1 className="text-lg font-black tracking-tight text-[#003859] dark:text-zinc-100">Admin Dashboard</h1>
+						<p className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mt-0.5">SCALE UWA • System Settings</p>
+					</div>
 				</div>
-				<div className="ml-auto flex items-center gap-2">
-					<button onClick={() => { fetchSessions(); fetchDbStatus(); }} className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-all cursor-pointer">
-						<RefreshCwIcon className="w-3 h-3" /> Refresh
+				<div className="flex items-center gap-3">
+					<button onClick={() => { fetchSessions(); fetchDbStatus(); }} className="flex items-center justify-center w-9 h-9 text-slate-600 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-slate-200/60 dark:border-zinc-700 rounded-full hover:bg-slate-50 dark:hover:bg-zinc-700 transition-all shadow-sm hover:shadow-md cursor-pointer group" title="Refresh Data">
+						<RefreshCwIcon className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
 					</button>
-					<a href="/api/live-agent/report" download className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-white bg-[#003859] hover:bg-[#002b45] rounded-lg transition-all cursor-pointer shadow-sm">
-						<DownloadIcon className="w-3 h-3" /> Export CSV
+					<a href="/api/live-agent/report" download className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-[#003859] to-sky-700 hover:from-[#002b45] hover:to-sky-800 rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0">
+						<DownloadIcon className="w-3.5 h-3.5" /> Export CSV
 					</a>
 					<button
 						onClick={() => { sessionStorage.clear(); router.push('/admin/login'); }}
-						className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-all cursor-pointer"
+						className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 rounded-full transition-all cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
 					>
-						Logout
+						<PowerIcon className="w-3.5 h-3.5" /> Logout
 					</button>
 				</div>
 			</header>
 
-			<div className="flex-1 p-6 space-y-6 max-w-6xl mx-auto w-full">
+			<div className="flex-1 p-8 space-y-6 max-w-[1920px] mx-auto w-full">
 
 				{/* Stats Cards */}
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+				<div className="grid grid-cols-2 md:grid-cols-4 gap-5">
 					{[
-						{ label: 'Total Sessions', value: totalSessions, icon: BarChart3Icon, color: 'text-slate-700 dark:text-zinc-200', bg: 'bg-white dark:bg-zinc-900' },
-						{ label: 'Waiting', value: waitingCount, icon: ClockIcon, color: 'text-amber-700 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-950/30' },
-						{ label: 'Active', value: activeCount, icon: UsersIcon, color: 'text-emerald-700 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
-						{ label: 'Resolved', value: resolvedCount, icon: CheckCircleIcon, color: 'text-blue-700 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-950/30' },
+						{ label: 'Total Sessions', value: totalSessions, icon: BarChart3Icon, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-white/80 dark:bg-zinc-800/80' },
+						{ label: 'Waiting', value: waitingCount, icon: ClockIcon, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50/80 dark:bg-amber-950/40' },
+						{ label: 'Active', value: activeCount, icon: UsersIcon, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-950/40' },
+						{ label: 'Resolved', value: resolvedCount, icon: CheckCircleIcon, color: 'text-sky-600 dark:text-sky-400', bg: 'bg-sky-50/80 dark:bg-sky-950/40' },
 					].map(({ label, value, icon: Icon, color, bg }) => (
-						<div key={label} className={`${bg} rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-zinc-800`}>
-							<div className="flex items-center justify-between">
+						<div key={label} className={`${bg} backdrop-blur-xl rounded-3xl p-5 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-white/60 dark:border-zinc-700/50 hover:shadow-lg transition-all hover:-translate-y-1`}>
+							<div className="flex items-start justify-between">
 								<div>
-									<p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">{label}</p>
-									<p className={`text-3xl font-black mt-1 ${color}`}>{value}</p>
+									<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-400">{label}</p>
+									<p className={`text-4xl font-black mt-2 tracking-tight ${color}`}>{value}</p>
 								</div>
-								<Icon className={`w-6 h-6 ${color} opacity-60`} />
+								<div className={`p-2.5 rounded-2xl bg-white/60 dark:bg-zinc-800/60 shadow-sm border border-white/20 dark:border-zinc-700/30`}>
+									<Icon className={`w-6 h-6 ${color}`} />
+								</div>
 							</div>
 						</div>
 					))}
 				</div>
 
 				{/* DB Status */}
-				<div className={`rounded-2xl p-4 shadow-sm border flex items-center justify-between gap-4 ${
-					dbStatus.status === 'checking' ? 'bg-white dark:bg-zinc-900 border-slate-100 dark:border-zinc-800' :
-					dbStatus.connected && dbStatus.status === 'ready' ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50' :
-					'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/50'
+				<div className={`backdrop-blur-xl rounded-2xl p-4 shadow-sm border border-white/40 flex items-center justify-between gap-4 transition-colors ${
+					dbStatus.status === 'checking' ? 'bg-white/60 dark:bg-zinc-800/60 dark:border-zinc-700/50' :
+					dbStatus.connected && dbStatus.status === 'ready' ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-200/50 dark:border-emerald-800/30' :
+					dbStatus.connected && dbStatus.status === 'no_tables' ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-200/50 dark:border-amber-800/30' :
+					'bg-rose-50/70 dark:bg-rose-950/30 border-rose-200/50 dark:border-rose-800/30'
 				}`}>
-					<div className="flex items-center gap-3">
-						<DatabaseIcon className={`w-5 h-5 ${dbStatus.status === 'checking' ? 'text-slate-400' : dbStatus.connected ? 'text-emerald-600' : 'text-red-500'}`} />
+					<div className="flex items-center gap-4">
+						<div className={`w-10 h-10 rounded-full flex items-center justify-center bg-white/60 dark:bg-zinc-900/60 shadow-sm border border-white/20 ${dbStatus.status === 'checking' ? 'text-slate-400' : dbStatus.connected ? dbStatus.status === 'no_tables' ? 'text-amber-500' : 'text-emerald-500' : 'text-rose-500'}`}>
+							<DatabaseIcon className="w-5 h-5" />
+						</div>
 						<div>
-							<p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">MongoDB Database</p>
-							<p className={`text-xs font-bold mt-0.5 ${dbStatus.status === 'checking' ? 'text-slate-500' : dbStatus.connected ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-								{dbStatus.status === 'checking' && 'Checking…'}
-								{dbStatus.status === 'ready' && 'Connected & Ready'}
-								{dbStatus.status === 'no_tables' && 'Connected — Tables Missing'}
-								{dbStatus.status === 'misconfigured' && 'Not Configured'}
-								{dbStatus.status === 'error' && 'Disconnected'}
+							<div className="flex items-center gap-2">
+								<p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-400">Database Storage</p>
+								{dbStatus.connected && <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${dbStatus.status === 'no_tables' ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>}
+							</div>
+							<p className={`text-sm font-black mt-0.5 ${dbStatus.status === 'checking' ? 'text-slate-600' : dbStatus.connected ? dbStatus.status === 'no_tables' ? 'text-amber-700 dark:text-amber-400' : 'text-emerald-700 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+								{dbStatus.status === 'checking' && 'Checking connection...'}
+								{dbStatus.status === 'ready' && 'MongoDB Connected & Ready'}
+								{dbStatus.status === 'no_tables' && 'MongoDB Connected (Awaiting First Chat)'}
+								{dbStatus.status === 'misconfigured' && 'Environment Not Configured'}
+								{dbStatus.status === 'error' && 'MongoDB Disconnected'}
 							</p>
-							<p className="text-[9px] text-slate-400 mt-0.5">{dbStatus.message}</p>
+							<p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-1">{dbStatus.message}</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-3 shrink-0">
-						{dbStatus.latencyMs !== null && <span className="text-[10px] text-slate-400 font-mono">{dbStatus.latencyMs}ms</span>}
-						<button onClick={fetchDbStatus} className="px-2.5 py-1 text-[10px] font-bold text-slate-600 border border-slate-200 dark:border-zinc-700 rounded-lg hover:bg-white dark:hover:bg-zinc-800 transition-all cursor-pointer flex items-center gap-1">
-							<RefreshCwIcon className="w-3 h-3" /> Recheck
+					<div className="flex flex-col items-end gap-1.5 shrink-0">
+						{dbStatus.latencyMs !== null && <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 font-bold bg-white/50 dark:bg-zinc-800/50 px-2 py-0.5 rounded-md">{dbStatus.latencyMs}ms ping</span>}
+						<button onClick={fetchDbStatus} className="text-[10px] font-bold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer flex items-center gap-1">
+							Recheck Connection
 						</button>
 					</div>
 				</div>
 
-				{/* Tab Bar */}
-				<div className="flex gap-1 p-1 bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 w-fit">
-					<button
-						onClick={() => setActiveTab('sessions')}
-						className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'sessions' ? 'bg-[#003859] text-white shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'}`}
-					>
-						<UsersIcon className="w-3.5 h-3.5" /> Sessions
-					</button>
-					<button
-						onClick={() => setActiveTab('email')}
-						className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'email' ? 'bg-[#003859] text-white shadow-sm' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'}`}
-					>
-						<MailIcon className="w-3.5 h-3.5" /> Email Settings
-					</button>
+				{/* Segmented Tab Bar */}
+				<div className="flex justify-center mb-2">
+					<div className="flex gap-1 p-1.5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md rounded-full shadow-inner border border-slate-200/50 dark:border-zinc-800/50 w-fit">
+						<button
+							onClick={() => setActiveTab('sessions')}
+							className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'sessions' ? 'bg-white dark:bg-zinc-800 text-[#003859] dark:text-sky-400 shadow-[0_2px_12px_rgba(0,0,0,0.06)]' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'}`}
+						>
+							<UsersIcon className="w-4 h-4" /> Live Sessions
+						</button>
+						<button
+							onClick={() => setActiveTab('email')}
+							className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${activeTab === 'email' ? 'bg-white dark:bg-zinc-800 text-[#003859] dark:text-sky-400 shadow-[0_2px_12px_rgba(0,0,0,0.06)]' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'}`}
+						>
+							<MailIcon className="w-4 h-4" /> Lead Email Setup
+						</button>
+					</div>
 				</div>
 
 				{/* ── SESSIONS TAB ── */}
 				{activeTab === 'sessions' && (
-					<>
+					<div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
 						{agentRole !== 'admin' && (
-							<div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 rounded-2xl p-4">
+							<div className="flex items-center gap-3 bg-amber-50/80 dark:bg-amber-950/20 backdrop-blur-sm border border-amber-200/60 dark:border-amber-800/50 rounded-2xl p-4 mb-4 shadow-sm">
 								<ShieldIcon className="w-5 h-5 text-amber-600 shrink-0" />
-								<p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
-									You are logged in as <strong>expert</strong>, not admin. Deletion is restricted to admin accounts.
+								<p className="text-[13px] text-amber-800 dark:text-amber-300 font-medium">
+									You are logged in as <strong>expert</strong>. Only admins can delete sessions.
 								</p>
 							</div>
 						)}
 
-						<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden">
-							<div className="px-5 py-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between gap-4 flex-wrap">
+						<div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 dark:border-zinc-700/50 overflow-hidden">
+							<div className="px-6 py-5 border-b border-slate-200/50 dark:border-zinc-800/50 flex items-center justify-between gap-4 flex-wrap bg-white/40 dark:bg-zinc-800/40">
 								<div>
-									<h2 className="text-sm font-black">All Sessions</h2>
-									<p className="text-[10px] text-slate-400 mt-0.5">{filteredSessions.length} sessions{selectedIds.size > 0 && ` · ${selectedIds.size} selected`}</p>
+									<h2 className="text-base font-black text-slate-800 dark:text-zinc-100">Live Chat History</h2>
+									<p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">{filteredSessions.length} total sessions{selectedIds.size > 0 && <span className="text-[#003859] font-bold"> • {selectedIds.size} selected</span>}</p>
 								</div>
-								<div className="flex items-center gap-2">
+								<div className="flex items-center gap-3">
 									<div className="relative">
-										<select value={filter} onChange={e => { setFilter(e.target.value as FilterType); setSelectedIds(new Set()); }} className="appearance-none text-[10px] font-bold bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl pl-3 pr-7 py-1.5 text-slate-700 dark:text-zinc-300 outline-none cursor-pointer">
-											<option value="all">All Statuses</option>
-											<option value="waiting">Waiting</option>
-											<option value="active">Active</option>
-											<option value="resolved">Resolved</option>
+										<select value={filter} onChange={e => { setFilter(e.target.value as FilterType); setSelectedIds(new Set()); }} className="appearance-none text-[11px] font-bold bg-white dark:bg-zinc-800 border border-slate-200/80 dark:border-zinc-700 rounded-full pl-4 pr-9 py-2 text-slate-700 dark:text-zinc-300 outline-none cursor-pointer shadow-sm focus:ring-2 focus:ring-[#003859]/20 transition-all">
+											<option value="all">View All Statuses</option>
+											<option value="waiting">View Waiting</option>
+											<option value="active">View Active</option>
+											<option value="resolved">View Resolved</option>
 										</select>
-										<ChevronDownIcon className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 pointer-events-none" />
+										<ChevronDownIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
 									</div>
 									{agentRole === 'admin' && selectedIds.size > 0 && (
-										<button onClick={() => setDeleteConfirm(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all cursor-pointer shadow-sm">
-											<Trash2Icon className="w-3 h-3" /> Delete {selectedIds.size} selected
+										<button onClick={() => setDeleteConfirm(true)} className="flex items-center gap-2 px-4 py-2 text-[11px] font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg hover:-translate-y-0.5">
+											<Trash2Icon className="w-3.5 h-3.5" /> Delete Selected ({selectedIds.size})
 										</button>
 									)}
 								</div>
 							</div>
 
 							{loading ? (
-								<div className="p-12 text-center">
-									<div className="w-6 h-6 border-2 border-[#003859] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-									<p className="text-xs text-slate-400">Loading sessions…</p>
+								<div className="p-16 text-center">
+									<div className="w-8 h-8 border-4 border-[#003859]/20 border-t-[#003859] dark:border-sky-500/20 dark:border-t-sky-500 rounded-full animate-spin mx-auto mb-4" />
+									<p className="text-[13px] font-medium text-slate-400">Fetching live sessions…</p>
 								</div>
 							) : filteredSessions.length === 0 ? (
-								<div className="p-12 text-center text-xs text-slate-400">No sessions found for the selected filter.</div>
+								<div className="p-16 text-center text-slate-400 flex flex-col items-center">
+									<div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+										<SearchIcon className="w-8 h-8 text-slate-300 dark:text-zinc-600" />
+									</div>
+									<p className="text-sm font-semibold">No sessions found</p>
+									<p className="text-[11px] mt-1">Try changing your filter settings.</p>
+								</div>
 							) : (
 								<div className="overflow-x-auto">
-									<table className="w-full text-left">
-										<thead className="bg-slate-50 dark:bg-zinc-850 border-b border-slate-100 dark:border-zinc-800">
+									<table className="w-full text-left border-collapse">
+										<thead className="bg-slate-50/50 dark:bg-zinc-800/50 border-b border-slate-200/60 dark:border-zinc-700/60 backdrop-blur-sm">
 											<tr>
-												{agentRole === 'admin' && <th className="px-4 py-3 w-10"><input type="checkbox" checked={selectedIds.size === filteredSessions.length && filteredSessions.length > 0} onChange={toggleSelectAll} className="w-3.5 h-3.5 rounded accent-[#003859] cursor-pointer" /></th>}
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Session ID</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Student</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Status</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Assigned Expert</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Messages</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Created At</th>
-												<th className="px-4 py-3 text-[9px] font-bold uppercase tracking-wider text-slate-400">Last Active</th>
+												{agentRole === 'admin' && <th className="px-5 py-4 w-12"><input type="checkbox" checked={selectedIds.size === filteredSessions.length && filteredSessions.length > 0} onChange={toggleSelectAll} className="w-4 h-4 rounded border-slate-300 text-[#003859] focus:ring-[#003859] cursor-pointer" /></th>}
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Session ID</th>
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Student Contact</th>
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Expert Assigned</th>
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Msg Count</th>
+												<th className="px-5 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Timeline</th>
 											</tr>
 										</thead>
-										<tbody className="divide-y divide-slate-50 dark:divide-zinc-850">
+										<tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
 											{filteredSessions.map(session => (
-												<tr key={session.id} className={`hover:bg-slate-50/50 transition-colors ${selectedIds.has(session.id) ? 'bg-sky-50/60 dark:bg-sky-950/20' : ''}`}>
-													{agentRole === 'admin' && <td className="px-4 py-3"><input type="checkbox" checked={selectedIds.has(session.id)} onChange={() => toggleSelect(session.id)} className="w-3.5 h-3.5 rounded accent-[#003859] cursor-pointer" /></td>}
-													<td className="px-4 py-3 text-[10px] font-mono text-slate-500">{session.id}</td>
-													<td className="px-4 py-3">
-														<div className="text-xs font-bold text-slate-800 dark:text-zinc-200">{session.userName}</div>
-														<div className="text-[9px] text-slate-400">{session.userEmail}</div>
+												<tr key={session.id} className={`hover:bg-slate-50/80 dark:hover:bg-zinc-800/50 transition-colors ${selectedIds.has(session.id) ? 'bg-sky-50/80 dark:bg-sky-950/20' : ''}`}>
+													{agentRole === 'admin' && <td className="px-5 py-4"><input type="checkbox" checked={selectedIds.has(session.id)} onChange={() => toggleSelect(session.id)} className="w-4 h-4 rounded border-slate-300 text-[#003859] focus:ring-[#003859] cursor-pointer" /></td>}
+													<td className="px-5 py-4 text-[11px] font-mono font-medium text-slate-500 bg-slate-50/50 dark:bg-zinc-900/50 rounded-lg m-2 inline-block px-2 py-1">{session.id}</td>
+													<td className="px-5 py-4">
+														<div className="text-[13px] font-bold text-slate-800 dark:text-zinc-200">{session.userName}</div>
+														<div className="text-[11px] text-slate-500 mt-0.5">{session.userEmail}</div>
 													</td>
-													<td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider ${statusColors[session.status]}`}>{session.status}</span></td>
-													<td className="px-4 py-3 text-[10px] text-slate-600">{session.assignedAgent || <span className="text-slate-300">—</span>}</td>
-													<td className="px-4 py-3 text-[10px] font-bold text-slate-600">{session.messages?.length ?? 0}</td>
-													<td className="px-4 py-3 text-[10px] text-slate-500">{formatDate(session.createdAt)}</td>
-													<td className="px-4 py-3 text-[10px] text-slate-500">{formatDate(session.lastActive)}</td>
+													<td className="px-5 py-4"><span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm ${statusColors[session.status]}`}>{session.status}</span></td>
+													<td className="px-5 py-4 text-[11px] font-medium text-slate-600 dark:text-zinc-300">{session.assignedAgent || <span className="text-slate-300 italic">Pending...</span>}</td>
+													<td className="px-5 py-4 text-[12px] font-black text-slate-600 dark:text-zinc-300 text-center"><div className="bg-slate-100 dark:bg-zinc-800 w-8 h-8 rounded-full flex items-center justify-center mx-auto">{session.messages?.length ?? 0}</div></td>
+													<td className="px-5 py-4 text-[11px] font-medium text-slate-500">
+														<div>Created: {formatDate(session.createdAt)}</div>
+														<div className="mt-0.5 text-slate-400">Active: {formatDate(session.lastActive)}</div>
+													</td>
 												</tr>
 											))}
 										</tbody>
@@ -419,242 +442,248 @@ export default function AdminPanel() {
 								</div>
 							)}
 						</div>
-					</>
+					</div>
 				)}
 
 				{/* ── EMAIL SETTINGS TAB ── */}
 				{activeTab === 'email' && (
-					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden">
-						<div className="px-6 py-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-							<div>
-								<h2 className="text-sm font-black text-slate-800 dark:text-zinc-100">Email Settings</h2>
-								<p className="text-[10px] text-slate-400 mt-0.5">Configure lead notifications via Gmail or Custom SMTP server.</p>
-							</div>
-						</div>
-
-						<div className="p-6 space-y-6">
-							{/* Provider Choice */}
-							<div>
-								<label className={labelCls}>Email Service Type</label>
-								<div className="flex gap-2 p-1 bg-slate-100 dark:bg-zinc-800 rounded-xl w-fit">
-									<button
-										type="button"
-										onClick={() => setEmailConfig(p => ({ ...p, provider: 'gmail', smtpHost: 'smtp.gmail.com', smtpPort: '465' }))}
-										className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-											(emailConfig.provider === 'gmail' || !emailConfig.provider)
-												? 'bg-[#003859] text-white shadow-sm'
-												: 'text-slate-600 dark:text-zinc-400 hover:text-slate-800'
-										}`}
-									>
-										Gmail (App Password)
-									</button>
-									<button
-										type="button"
-										onClick={() => setEmailConfig(p => ({ ...p, provider: 'smtp' }))}
-										className={`px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-											emailConfig.provider === 'smtp'
-												? 'bg-[#003859] text-white shadow-sm'
-												: 'text-slate-600 dark:text-zinc-400 hover:text-slate-800'
-										}`}
-									>
-										Custom SMTP Server
-									</button>
-								</div>
-							</div>
-
-							<hr className="border-slate-100 dark:border-zinc-800" />
-
-							{/* Recipient */}
-							<div>
-								<h3 className="text-xs font-black text-slate-700 dark:text-zinc-200 mb-4 flex items-center gap-2">
-									<span className="w-5 h-5 rounded-full bg-[#003859] text-white flex items-center justify-center text-[9px] font-black">1</span>
-									Recipient Settings
-								</h3>
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div>
-										<label className={labelCls}>Lead Notification Email (To)</label>
-										<input
-											type="email"
-											value={emailConfig.leadEmailTo}
-											onChange={e => setEmailConfig(p => ({ ...p, leadEmailTo: e.target.value }))}
-											placeholder="admin@yourdomain.com"
-											className={inputCls}
-										/>
-										<p className="text-[9px] text-slate-400 mt-1">New lead notifications will be sent to this email address.</p>
+					<div className="animate-in fade-in slide-in-from-bottom-2 duration-300 flex justify-center">
+						<div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 dark:border-zinc-700/50 overflow-hidden max-w-4xl w-full">
+							<div className="px-8 py-6 border-b border-slate-200/50 dark:border-zinc-800/50 flex items-center justify-between bg-white/40 dark:bg-zinc-800/40">
+								<div className="flex items-center gap-4">
+									<div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg border border-white/20">
+										<MailIcon className="w-5 h-5" />
 									</div>
 									<div>
-										<label className={labelCls}>Email Subject Prefix</label>
-										<input
-											type="text"
-											value={emailConfig.subjectPrefix}
-											onChange={e => setEmailConfig(p => ({ ...p, subjectPrefix: e.target.value }))}
-											placeholder="New User Lead"
-											className={inputCls}
-										/>
-										<p className="text-[9px] text-slate-400 mt-1">E.g. "New User Lead" → Subject: "New User Lead: John Doe"</p>
+										<h2 className="text-base font-black text-slate-800 dark:text-zinc-100">Lead Email Forwarding</h2>
+										<p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 mt-0.5">Configure automated notifications for new student leads.</p>
 									</div>
 								</div>
 							</div>
 
-							<hr className="border-slate-100 dark:border-zinc-800" />
+							<div className="p-8 space-y-8">
+								{/* Provider Choice */}
+								<div>
+									<label className={labelCls}>Email Service Provider</label>
+									<div className="flex gap-2 p-1.5 bg-slate-100/50 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/50 rounded-2xl w-fit">
+										<button
+											type="button"
+											onClick={() => setEmailConfig(p => ({ ...p, provider: 'gmail', smtpHost: 'smtp.gmail.com', smtpPort: '465' }))}
+											className={`px-5 py-2.5 text-[11px] font-black rounded-xl transition-all cursor-pointer ${
+												(emailConfig.provider === 'gmail' || !emailConfig.provider)
+													? 'bg-white dark:bg-zinc-700 text-[#003859] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200/50 dark:border-zinc-600/50'
+													: 'text-slate-500 dark:text-zinc-400 hover:text-slate-800'
+											}`}
+										>
+											Gmail App Password
+										</button>
+										<button
+											type="button"
+											onClick={() => setEmailConfig(p => ({ ...p, provider: 'smtp' }))}
+											className={`px-5 py-2.5 text-[11px] font-black rounded-xl transition-all cursor-pointer ${
+												emailConfig.provider === 'smtp'
+													? 'bg-white dark:bg-zinc-700 text-[#003859] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200/50 dark:border-zinc-600/50'
+													: 'text-slate-500 dark:text-zinc-400 hover:text-slate-800'
+											}`}
+										>
+											Custom SMTP Relay
+										</button>
+									</div>
+								</div>
 
-							{/* Sender Settings according to provider */}
-							<div>
-								<h3 className="text-xs font-black text-slate-700 dark:text-zinc-200 mb-4 flex items-center gap-2">
-									<span className="w-5 h-5 rounded-full bg-[#003859] text-white flex items-center justify-center text-[9px] font-black">2</span>
-									{emailConfig.provider === 'smtp' ? 'Custom SMTP Credentials' : 'Gmail Sender Credentials'}
-								</h3>
-
-								{emailConfig.provider === 'gmail' || !emailConfig.provider ? (
-									/* Gmail Configuration */
-									<div className="space-y-4">
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-											<div>
-												<label className={labelCls}>Gmail Address (Sender)</label>
-												<input
-													type="email"
-													value={emailConfig.smtpUser}
-													onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
-													placeholder="yourname@gmail.com"
-													className={inputCls}
-												/>
-											</div>
-											<div>
-												<label className={labelCls}>Gmail App Password</label>
-												<div className="relative">
-													<input
-														type={showPass ? 'text' : 'password'}
-														value={emailConfig.smtpPass}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
-														placeholder="16-character App Password"
-														className={`${inputCls} pr-10 font-mono`}
-													/>
-													<button
-														type="button"
-														onClick={() => setShowPass(p => !p)}
-														className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-														title={showPass ? "Hide password" : "Show password"}
-													>
-														{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-													</button>
-												</div>
-												<p className="text-[9px] text-slate-400 mt-1">
-													Click the eye icon to view or verify your 16-character App Password.
-												</p>
-											</div>
-											<div className="md:col-span-2">
-												<label className={labelCls}>From Display Name</label>
-												<input
-													type="text"
-													value={emailConfig.fromName}
-													onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
-													placeholder="SCALE UWA Assistant"
-													className={inputCls}
-												/>
-											</div>
+								{/* Recipient */}
+								<div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50">
+									<h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 mb-5 flex items-center gap-3">
+										<span className="w-6 h-6 rounded-full bg-[#003859] text-white flex items-center justify-center text-[10px] font-black shadow-md">1</span>
+										Recipient Rules
+									</h3>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<div>
+											<label className={labelCls}>Destination Email Address</label>
+											<input
+												type="email"
+												value={emailConfig.leadEmailTo}
+												onChange={e => setEmailConfig(p => ({ ...p, leadEmailTo: e.target.value }))}
+												placeholder="admissions@sona.com"
+												className={inputCls}
+											/>
+											<p className="text-[10px] text-slate-400 font-medium mt-1.5 pl-1">Where should we forward the captured student data?</p>
 										</div>
-
-										{/* Gmail instructions tip */}
-										<div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl">
-											<h4 className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">How to generate a Gmail App Password:</h4>
-											<ol className="text-[10px] text-blue-700 dark:text-blue-300/80 list-decimal list-inside space-y-1 leading-relaxed">
-												<li>Go to your <strong>Google Account</strong> settings (myaccount.google.com).</li>
-												<li>Select <strong>Security</strong> and ensure <strong>2-Step Verification</strong> is enabled.</li>
-												<li>Search for <strong>App Passwords</strong> and create a new key named "Chatbot".</li>
-												<li>Copy the generated 16-character password and paste it into the field above.</li>
-											</ol>
+										<div>
+											<label className={labelCls}>Subject Line Prefix</label>
+											<input
+												type="text"
+												value={emailConfig.subjectPrefix}
+												onChange={e => setEmailConfig(p => ({ ...p, subjectPrefix: e.target.value }))}
+												placeholder="New Lead"
+												className={inputCls}
+											/>
+											<p className="text-[10px] text-slate-400 font-medium mt-1.5 pl-1">e.g. "New Lead" appears as: "New Lead: John Doe"</p>
 										</div>
 									</div>
-								) : (
-									/* Custom SMTP Configuration */
-									<div className="space-y-4">
-										<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-											<div>
-												<label className={labelCls}>SMTP Host</label>
-												<input
-													type="text"
-													value={emailConfig.smtpHost}
-													onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))}
-													placeholder="smtp.example.com"
-													className={inputCls}
-												/>
-											</div>
-											<div>
-												<label className={labelCls}>SMTP Port</label>
-												<input
-													type="text"
-													value={emailConfig.smtpPort}
-													onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))}
-													placeholder="587 or 465"
-													className={inputCls}
-												/>
-											</div>
-											<div>
-												<label className={labelCls}>SMTP Username / Email</label>
-												<input
-													type="text"
-													value={emailConfig.smtpUser}
-													onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
-													placeholder="user@example.com"
-													className={inputCls}
-												/>
-											</div>
-											<div>
-												<label className={labelCls}>SMTP Password</label>
-												<div className="relative">
+								</div>
+
+								{/* Sender Settings according to provider */}
+								<div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50">
+									<h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 mb-5 flex items-center gap-3">
+										<span className="w-6 h-6 rounded-full bg-[#003859] text-white flex items-center justify-center text-[10px] font-black shadow-md">2</span>
+										{emailConfig.provider === 'smtp' ? 'SMTP Authentication' : 'Gmail Sender Authentication'}
+									</h3>
+
+									{emailConfig.provider === 'gmail' || !emailConfig.provider ? (
+										<div className="space-y-6">
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+												<div>
+													<label className={labelCls}>Gmail Address (Sender)</label>
 													<input
-														type={showPass ? 'text' : 'password'}
-														value={emailConfig.smtpPass}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
-														placeholder="SMTP password"
-														className={`${inputCls} pr-10`}
+														type="email"
+														value={emailConfig.smtpUser}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
+														placeholder="yourname@gmail.com"
+														className={inputCls}
 													/>
-													<button
-														type="button"
-														onClick={() => setShowPass(p => !p)}
-														className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
-														title={showPass ? "Hide password" : "Show password"}
-													>
-														{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-													</button>
+												</div>
+												<div>
+													<label className={labelCls}>16-Digit App Password</label>
+													<div className="relative">
+														<input
+															type={showPass ? 'text' : 'password'}
+															value={emailConfig.smtpPass}
+															onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
+															placeholder="••••••••••••••••"
+															className={`${inputCls} pr-12 font-mono tracking-widest`}
+														/>
+														<button
+															type="button"
+															onClick={() => setShowPass(p => !p)}
+															className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-800 p-1 rounded-md cursor-pointer transition-colors"
+															title={showPass ? "Hide password" : "Show password"}
+														>
+															{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+														</button>
+													</div>
+												</div>
+												<div className="md:col-span-2">
+													<label className={labelCls}>From Display Name</label>
+													<input
+														type="text"
+														value={emailConfig.fromName}
+														onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
+														placeholder="SCALE UWA Assistant"
+														className={inputCls}
+													/>
 												</div>
 											</div>
-											<div className="md:col-span-2">
-												<label className={labelCls}>From Display Name</label>
-												<input
-													type="text"
-													value={emailConfig.fromName}
-													onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
-													placeholder="SCALE UWA Assistant"
-													className={inputCls}
-												/>
+
+											{/* Gmail instructions tip */}
+											<div className="p-5 bg-blue-50/80 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl flex gap-4">
+												<div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+													<ShieldIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+												</div>
+												<div>
+													<h4 className="text-xs font-black text-blue-900 dark:text-blue-300 mb-2 uppercase tracking-widest">How to get an App Password</h4>
+													<ol className="text-[11px] text-blue-800 dark:text-blue-200 list-decimal list-outside ml-3 space-y-1.5 font-medium leading-relaxed">
+														<li>Go to <strong>myaccount.google.com</strong> &gt; Security.</li>
+														<li>Ensure <strong>2-Step Verification</strong> is ON.</li>
+														<li>Search for <strong>App Passwords</strong> and create one named "Chatbot".</li>
+														<li>Paste the 16-character code above. Never use your main account password.</li>
+													</ol>
+												</div>
 											</div>
 										</div>
-									</div>
-								)}
-							</div>
+									) : (
+										/* Custom SMTP Configuration */
+										<div className="space-y-6">
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+												<div>
+													<label className={labelCls}>SMTP Host</label>
+													<input
+														type="text"
+														value={emailConfig.smtpHost}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))}
+														placeholder="smtp-relay.brevo.com"
+														className={inputCls}
+													/>
+												</div>
+												<div>
+													<label className={labelCls}>SMTP Port</label>
+													<input
+														type="text"
+														value={emailConfig.smtpPort}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))}
+														placeholder="587"
+														className={inputCls}
+													/>
+												</div>
+												<div className="md:col-span-2">
+													<label className={labelCls}>SMTP Login / User</label>
+													<input
+														type="text"
+														value={emailConfig.smtpUser}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
+														placeholder="user@example.com"
+														className={inputCls}
+													/>
+												</div>
+												<div className="md:col-span-2">
+													<label className={labelCls}>SMTP Password / API Key</label>
+													<div className="relative">
+														<input
+															type={showPass ? 'text' : 'password'}
+															value={emailConfig.smtpPass}
+															onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
+															placeholder="••••••••••••••••"
+															className={`${inputCls} pr-12 font-mono tracking-widest`}
+														/>
+														<button
+															type="button"
+															onClick={() => setShowPass(p => !p)}
+															className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-800 p-1 rounded-md cursor-pointer transition-colors"
+															title={showPass ? "Hide password" : "Show password"}
+														>
+															{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+														</button>
+													</div>
+												</div>
+												<div className="md:col-span-2">
+													<label className={labelCls}>From Display Name</label>
+													<input
+														type="text"
+														value={emailConfig.fromName}
+														onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
+														placeholder="SCALE UWA Assistant"
+														className={inputCls}
+													/>
+												</div>
+											</div>
+										</div>
+									)}
+								</div>
 
-							{/* Action Buttons */}
-							<div className="flex items-center gap-3 pt-2">
-								<button
-									onClick={handleSaveEmailConfig}
-									disabled={emailSaving}
-									className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#003859] hover:bg-[#002b45] rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50"
-								>
-									{emailSaving ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SaveIcon className="w-3.5 h-3.5" />}
-									Save Settings
-								</button>
-								<button
-									onClick={handleTestEmail}
-									disabled={emailTesting || !emailConfig.smtpUser || !emailConfig.leadEmailTo}
-									className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-[#003859] bg-white hover:bg-slate-50 border border-slate-200 dark:border-zinc-700 rounded-xl transition-all cursor-pointer disabled:opacity-40"
-								>
-									{emailTesting ? <span className="w-3.5 h-3.5 border-2 border-[#003859] border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-3.5 h-3.5" />}
-									Send Test Email
-								</button>
-								<p className="text-[9px] text-slate-400 ml-2">
-									Changes are saved to the server. Env var values are used as defaults if no saved config exists.
-								</p>
+								{/* Action Buttons */}
+								<div className="flex items-center justify-between pt-4 border-t border-slate-200/50 dark:border-zinc-800/50">
+									<p className="text-[11px] font-medium text-slate-400">
+										Config is saved to MongoDB. Environment variables are used as fallbacks.
+									</p>
+									<div className="flex items-center gap-3">
+										<button
+											onClick={handleTestEmail}
+											disabled={emailTesting || !emailConfig.smtpUser || !emailConfig.leadEmailTo}
+											className="flex items-center gap-2 px-6 py-3 text-[11px] font-black text-slate-700 dark:text-zinc-200 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 border border-slate-200/80 dark:border-zinc-700 rounded-full transition-all cursor-pointer shadow-sm disabled:opacity-50 hover:shadow-md"
+										>
+											{emailTesting ? <span className="w-4 h-4 border-2 border-slate-700 border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-4 h-4 text-[#003859] dark:text-sky-400" />}
+											Send Test Pulse
+										</button>
+										<button
+											onClick={handleSaveEmailConfig}
+											disabled={emailSaving}
+											className="flex items-center gap-2 px-6 py-3 text-[11px] font-black text-white bg-gradient-to-r from-[#003859] to-sky-700 hover:from-[#002b45] hover:to-sky-800 rounded-full transition-all cursor-pointer shadow-md shadow-[#003859]/20 disabled:opacity-50 hover:shadow-lg hover:-translate-y-0.5"
+										>
+											{emailSaving ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SaveIcon className="w-4 h-4" />}
+											Save Configuration
+										</button>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

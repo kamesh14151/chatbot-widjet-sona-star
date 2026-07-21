@@ -76,16 +76,22 @@ export default function AgentDashboard() {
 	const fetchSessions = async (selectFirst = false) => {
 		try {
 			const res = await fetch('/api/live-agent/list');
-			if (!res.ok) throw new Error("Failed to fetch sessions");
+			if (!res.ok) return;
 			const list: ChatSession[] = await res.json();
 			setSessions(list);
 			setLastSyncTime(new Date().toLocaleString());
 
-			if (selectFirst && list.length > 0 && !selectedSessionId) {
-				setSelectedSessionId(list[0].id);
+			if (list.length > 0) {
+				const isValid = selectedSessionId && list.some(s => s.id === selectedSessionId);
+				if (!isValid && (selectFirst || !selectedSessionId)) {
+					setSelectedSessionId(list[0].id);
+				}
+			} else {
+				setSelectedSessionId(null);
+				setActiveSession(null);
 			}
 		} catch (error) {
-			console.error("Error fetching sessions list:", error);
+			// Silent error catch
 		}
 	};
 
@@ -110,6 +116,9 @@ export default function AgentDashboard() {
 			if (!res.ok) {
 				if (res.status === 404) {
 					setActiveSession(null);
+					if (sessions.length > 0 && sessions[0].id !== selectedSessionId) {
+						setSelectedSessionId(sessions[0].id);
+					}
 				}
 				return;
 			}
@@ -120,9 +129,9 @@ export default function AgentDashboard() {
 			if (meta) {
 				setActiveSession({
 					...meta,
-					messages: data.messages,
-					status: data.status,
-					assignedAgent: data.assignedAgent
+					messages: data.messages || [],
+					status: data.status || 'waiting',
+					assignedAgent: data.assignedAgent || null
 				});
 			} else {
 				setActiveSession({
@@ -130,15 +139,15 @@ export default function AgentDashboard() {
 					userName: data.userName || selectedSessionId,
 					userEmail: '',
 					userPhone: '',
-					status: data.status,
-					assignedAgent: data.assignedAgent,
-					messages: data.messages,
+					status: data.status || 'waiting',
+					assignedAgent: data.assignedAgent || null,
+					messages: data.messages || [],
 					createdAt: Date.now(),
 					lastActive: Date.now()
 				});
 			}
 		} catch (error) {
-			console.error("Error loading active session details:", error);
+			// Silent error catch
 		}
 	};
 

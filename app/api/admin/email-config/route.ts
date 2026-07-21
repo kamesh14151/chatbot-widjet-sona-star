@@ -19,11 +19,11 @@ export interface EmailConfig {
 }
 
 const DEFAULT_CONFIG: EmailConfig = {
-	provider:      (process.env.SMTP_HOST && !process.env.SMTP_HOST.includes('gmail')) ? 'smtp' : 'gmail',
-	smtpHost:      process.env.SMTP_HOST      || 'smtp.gmail.com',
-	smtpPort:      process.env.SMTP_PORT      || '465',
-	smtpUser:      process.env.SMTP_USER      || process.env.GMAIL_USER || '',
-	smtpPass:      process.env.SMTP_PASS      || process.env.GMAIL_PASS || '',
+	provider:      'smtp',
+	smtpHost:      process.env.SMTP_HOST      || 'smtp-relay.brevo.com',
+	smtpPort:      process.env.SMTP_PORT      || '587',
+	smtpUser:      process.env.SMTP_USER      || '',
+	smtpPass:      process.env.SMTP_PASS      || '',
 	fromName:      process.env.EMAIL_FROM_NAME || 'SCALE UWA Assistant',
 	leadEmailTo:   process.env.LEAD_EMAIL_TO  || 'kamesh6592@gmail.com',
 	subjectPrefix: process.env.EMAIL_SUBJECT_PREFIX || 'New User Lead',

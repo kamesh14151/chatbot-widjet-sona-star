@@ -468,27 +468,12 @@ export default function AdminPanel() {
 									<div className="flex gap-2 p-1.5 bg-slate-100/50 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/50 rounded-2xl w-fit">
 										<button
 											type="button"
-											onClick={() => setEmailConfig(p => ({ ...p, provider: 'gmail', smtpHost: 'smtp.gmail.com', smtpPort: '465' }))}
-											className={`px-5 py-2.5 text-[11px] font-black rounded-xl transition-all cursor-pointer ${
-												(emailConfig.provider === 'gmail' || !emailConfig.provider)
-													? 'bg-white dark:bg-zinc-700 text-[#003859] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200/50 dark:border-zinc-600/50'
-													: 'text-slate-500 dark:text-zinc-400 hover:text-slate-800'
-											}`}
+											className={`px-5 py-2.5 text-[11px] font-black rounded-xl transition-all cursor-pointer bg-white dark:bg-zinc-700 text-[#003859] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200/50 dark:border-zinc-600/50`}
 										>
-											Gmail App Password
-										</button>
-										<button
-											type="button"
-											onClick={() => setEmailConfig(p => ({ ...p, provider: 'smtp' }))}
-											className={`px-5 py-2.5 text-[11px] font-black rounded-xl transition-all cursor-pointer ${
-												emailConfig.provider === 'smtp'
-													? 'bg-white dark:bg-zinc-700 text-[#003859] dark:text-white shadow-[0_2px_8px_rgba(0,0,0,0.05)] border border-slate-200/50 dark:border-zinc-600/50'
-													: 'text-slate-500 dark:text-zinc-400 hover:text-slate-800'
-											}`}
-										>
-											Custom SMTP Relay
+											Brevo Official SDK
 										</button>
 									</div>
+									<p className="text-[10px] text-slate-400 font-medium mt-1.5 pl-1">The system now uses the official <strong>sib-api-v3-sdk</strong> for maximum reliability.</p>
 								</div>
 
 								{/* Recipient */}
@@ -527,137 +512,54 @@ export default function AdminPanel() {
 								<div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50">
 									<h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 mb-5 flex items-center gap-3">
 										<span className="w-6 h-6 rounded-full bg-[#003859] text-white flex items-center justify-center text-[10px] font-black shadow-md">2</span>
-										{emailConfig.provider === 'smtp' ? 'SMTP Authentication' : 'Gmail Sender Authentication'}
+										Brevo Authentication
 									</h3>
 
-									{emailConfig.provider === 'gmail' || !emailConfig.provider ? (
-										<div className="space-y-6">
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-												<div>
-													<label className={labelCls}>Gmail Address (Sender)</label>
+									<div className="space-y-6">
+										<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+											<div className="md:col-span-2">
+												<label className={labelCls}>Brevo API Key</label>
+												<div className="relative">
 													<input
-														type="email"
-														value={emailConfig.smtpUser}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
-														placeholder="yourname@gmail.com"
-														className={inputCls}
+														type={showPass ? 'text' : 'password'}
+														value={emailConfig.smtpPass}
+														onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
+														placeholder="xkeysib-..."
+														className={`${inputCls} pr-12 font-mono tracking-widest`}
 													/>
+													<button
+														type="button"
+														onClick={() => setShowPass(p => !p)}
+														className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-800 p-1 rounded-md cursor-pointer transition-colors"
+														title={showPass ? "Hide key" : "Show key"}
+													>
+														{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+													</button>
 												</div>
-												<div>
-													<label className={labelCls}>16-Digit App Password</label>
-													<div className="relative">
-														<input
-															type={showPass ? 'text' : 'password'}
-															value={emailConfig.smtpPass}
-															onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
-															placeholder="••••••••••••••••"
-															className={`${inputCls} pr-12 font-mono tracking-widest`}
-														/>
-														<button
-															type="button"
-															onClick={() => setShowPass(p => !p)}
-															className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-800 p-1 rounded-md cursor-pointer transition-colors"
-															title={showPass ? "Hide password" : "Show password"}
-														>
-															{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-														</button>
-													</div>
-												</div>
-												<div className="md:col-span-2">
-													<label className={labelCls}>From Display Name</label>
-													<input
-														type="text"
-														value={emailConfig.fromName}
-														onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
-														placeholder="SCALE UWA Assistant"
-														className={inputCls}
-													/>
-												</div>
+												<p className="text-[10px] text-slate-400 font-medium mt-1.5 pl-1">Enter your Brevo v3 API Key (must start with `xkeysib-`)</p>
 											</div>
-
-											{/* Gmail instructions tip */}
-											<div className="p-5 bg-blue-50/80 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl flex gap-4">
-												<div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
-													<ShieldIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-												</div>
-												<div>
-													<h4 className="text-xs font-black text-blue-900 dark:text-blue-300 mb-2 uppercase tracking-widest">How to get an App Password</h4>
-													<ol className="text-[11px] text-blue-800 dark:text-blue-200 list-decimal list-outside ml-3 space-y-1.5 font-medium leading-relaxed">
-														<li>Go to <strong>myaccount.google.com</strong> &gt; Security.</li>
-														<li>Ensure <strong>2-Step Verification</strong> is ON.</li>
-														<li>Search for <strong>App Passwords</strong> and create one named "Chatbot".</li>
-														<li>Paste the 16-character code above. Never use your main account password.</li>
-													</ol>
-												</div>
+											<div>
+												<label className={labelCls}>Sender Address</label>
+												<input
+													type="email"
+													value={emailConfig.smtpUser}
+													onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
+													placeholder="no-reply@yourdomain.com"
+													className={inputCls}
+												/>
+											</div>
+											<div>
+												<label className={labelCls}>From Display Name</label>
+												<input
+													type="text"
+													value={emailConfig.fromName}
+													onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
+													placeholder="SCALE UWA Assistant"
+													className={inputCls}
+												/>
 											</div>
 										</div>
-									) : (
-										/* Custom SMTP Configuration */
-										<div className="space-y-6">
-											<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-												<div>
-													<label className={labelCls}>SMTP Host</label>
-													<input
-														type="text"
-														value={emailConfig.smtpHost}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpHost: e.target.value }))}
-														placeholder="smtp-relay.brevo.com"
-														className={inputCls}
-													/>
-												</div>
-												<div>
-													<label className={labelCls}>SMTP Port</label>
-													<input
-														type="text"
-														value={emailConfig.smtpPort}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpPort: e.target.value }))}
-														placeholder="587"
-														className={inputCls}
-													/>
-												</div>
-												<div className="md:col-span-2">
-													<label className={labelCls}>SMTP Login / User</label>
-													<input
-														type="text"
-														value={emailConfig.smtpUser}
-														onChange={e => setEmailConfig(p => ({ ...p, smtpUser: e.target.value }))}
-														placeholder="user@example.com"
-														className={inputCls}
-													/>
-												</div>
-												<div className="md:col-span-2">
-													<label className={labelCls}>SMTP Password / API Key</label>
-													<div className="relative">
-														<input
-															type={showPass ? 'text' : 'password'}
-															value={emailConfig.smtpPass}
-															onChange={e => setEmailConfig(p => ({ ...p, smtpPass: e.target.value }))}
-															placeholder="••••••••••••••••"
-															className={`${inputCls} pr-12 font-mono tracking-widest`}
-														/>
-														<button
-															type="button"
-															onClick={() => setShowPass(p => !p)}
-															className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 bg-white dark:bg-zinc-800 p-1 rounded-md cursor-pointer transition-colors"
-															title={showPass ? "Hide password" : "Show password"}
-														>
-															{showPass ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
-														</button>
-													</div>
-												</div>
-												<div className="md:col-span-2">
-													<label className={labelCls}>From Display Name</label>
-													<input
-														type="text"
-														value={emailConfig.fromName}
-														onChange={e => setEmailConfig(p => ({ ...p, fromName: e.target.value }))}
-														placeholder="SCALE UWA Assistant"
-														className={inputCls}
-													/>
-												</div>
-											</div>
-										</div>
-									)}
+									</div>
 								</div>
 
 								{/* Action Buttons */}

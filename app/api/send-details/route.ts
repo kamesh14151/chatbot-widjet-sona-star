@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 import { validateName, validateEmail, validatePhone } from "@/lib/contact-validator";
 
 export async function POST(req: NextRequest) {
@@ -64,51 +63,51 @@ export async function POST(req: NextRequest) {
 		const { readEmailConfigAsync } = await import('@/app/api/admin/email-config/route');
 		const cfg = await readEmailConfigAsync();
 
-		const smtpUser = cfg.smtpUser;
-		const smtpPass = cfg.smtpPass;
-		const smtpHost = cfg.smtpHost;
-		const smtpPort = Number(cfg.smtpPort || 465);
-		const fromName = cfg.fromName;
+		const apiKey = cfg.smtpPass; // The API key is stored in the smtpPass field
+		const fromName = cfg.fromName || "SCALE UWA Assistant";
 		const leadEmailTo = cfg.leadEmailTo;
-		const subjectPrefix = cfg.subjectPrefix;
-		const isGmail = cfg.provider === 'gmail' || smtpHost.includes("gmail");
+		const subjectPrefix = cfg.subjectPrefix || "New User Lead";
 
-		let transporter: nodemailer.Transporter;
-
-		if (smtpUser && smtpPass) {
-			if (isGmail) {
-				transporter = nodemailer.createTransport({
-					service: "gmail",
-					auth: { user: smtpUser, pass: smtpPass },
-				});
-			} else {
-				transporter = nodemailer.createTransport({
-					host: smtpHost,
-					port: smtpPort,
-					secure: smtpPort === 465,
-					auth: { user: smtpUser, pass: smtpPass },
-				});
-			}
-
-			await transporter.sendMail({
-				from: `"${fromName}" <${smtpUser}>`,
-				to: leadEmailTo,
+		if (apiKey && apiKey.startsWith('xkeysib') || apiKey.startsWith('xsmtpsib')) {
+			const emailData = {
+				sender: { email: cfg.smtpUser || "no-reply@sonascale.uwa", name: fromName },
+				to: [{ email: leadEmailTo, name: "Admin" }],
 				subject: `${subjectPrefix}: ${name}`,
-				html: `
-					<h2>New Lead captured in SCALE UWA Chatbot</h2>
-					<p><strong>Name:</strong> ${name}</p>
-					<p><strong>Email:</strong> ${email}</p>
-					<p><strong>Phone:</strong> ${phone}</p>
-					<hr />
-					<p><strong>User IP Address:</strong> ${ip}</p>
-					<p><strong>IP-Based Location:</strong> ${locationInfo}</p>
+				htmlContent: `
+					<div style="font-family: Arial, sans-serif; padding: 20px;">
+						<h2>New Lead captured in SCALE UWA Chatbot</h2>
+						<p><strong>Name:</strong> ${name}</p>
+						<p><strong>Email:</strong> ${email}</p>
+						<p><strong>Phone:</strong> ${phone}</p>
+						<hr />
+						<p><strong>User IP Address:</strong> ${ip}</p>
+						<p><strong>IP-Based Location:</strong> ${locationInfo}</p>
+						<br/>
+						<p style="font-size: 12px; color: #555;">SCALE UWA Live Support System</p>
+					</div>
 				`,
+			};
+
+			const brevoRes = await fetch("https://api.brevo.com/v3/smtp/email", {
+				method: "POST",
+				headers: {
+					"Accept": "application/json",
+					"Content-Type": "application/json",
+					"api-key": apiKey
+				},
+				body: JSON.stringify(emailData)
 			});
 
-			console.log(`Email sent to ${leadEmailTo} for lead: ${name}`);
+			if (!brevoRes.ok) {
+				const errText = await brevoRes.text();
+				console.error("Brevo API Error:", errText);
+				throw new Error("Failed to send email via Brevo API");
+			}
+			
+			console.log(`Email sent via Brevo API to ${leadEmailTo} for lead: ${name}`);
 		} else {
 			console.log("-----------------------------------------");
-			console.log("Lead captured (No SMTP credentials configured):");
+			console.log("Lead captured (No Brevo API Key configured):");
 			console.log(`Name: ${name}, Email: ${email}, Phone: ${phone}`);
 			console.log(`IP: ${ip}, Location: ${locationInfo}`);
 			console.log("Configure email in Admin Panel → Email Settings.");
